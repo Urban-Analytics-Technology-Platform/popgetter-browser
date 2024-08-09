@@ -1,0 +1,11 @@
+# Shared
+web/node_modules/
+web/build
+dist/
+test-results/
+.DS_Store
+package-lock.json
+.svelte-kit/
+
+rust_backend/Cargo.lock
+rust_backend/target/
