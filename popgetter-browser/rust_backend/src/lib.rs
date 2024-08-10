@@ -6,10 +6,14 @@ mod timer;
 use std::sync::Once;
 
 use geojson::{Feature, FeatureCollection};
+use log::info;
+use polars::frame::DataFrame;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
 use serde_json::map::Map;
 use wasm_bindgen::prelude::*;
+
+use popgetter::Popgetter;
 
 use self::timer::Timer;
 
@@ -26,19 +30,30 @@ pub fn get_random_color() -> &'static str {
 // constructor. This file (lib.rs) should handle all the WASM interactions, and most of the logic
 // should happen in other modules.
 #[wasm_bindgen]
-pub struct Backend {}
+pub struct Backend {
+    popgetter: Popgetter,
+}
 
 #[wasm_bindgen]
 impl Backend {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Backend {
+    pub async fn new() -> Backend {
         // Panics shouldn't happen, but if they do, console.log them.
         console_error_panic_hook::set_once();
         START.call_once(|| {
             console_log::init_with_level(log::Level::Info).unwrap();
         });
-        initialise(Timer::new("setup backend", None));
-        Backend {}
+        Backend {
+            popgetter: Popgetter::new()
+                .await
+                .map_err(|err| info!("{err}"))
+                .unwrap(),
+        }
+    }
+
+    #[wasm_bindgen(js_name = getCountries)]
+    pub async fn countries(&self) -> String {
+        format!("{}", self.popgetter.metadata.countries)
     }
 
     /// Add a property called 'color' to each feature in the input GeoJSON. The value is a random
@@ -80,5 +95,22 @@ fn err_to_js<E: std::fmt::Display>(err: E) -> JsValue {
 fn initialise(mut timer: Timer) {
     for step in 0..10 {
         timer.step(format!("do something, step {step}"));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wasm_bindgen_test::*;
+
+    #[wasm_bindgen_test]
+    fn pass() {
+        assert_eq!(1, 1);
+    }
+
+    #[wasm_bindgen_test(async)]
+    async fn test_backend() {
+        let backend = Backend::new().await;
+        info!("{}", backend.popgetter.metadata.countries);
     }
 }
