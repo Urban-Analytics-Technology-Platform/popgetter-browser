@@ -29,8 +29,6 @@
         await $rustBackend!.initialise();
       }
       const new_gj = await $rustBackend!.addColours(JSON.parse(contents));
-      const countries = await $rustBackend!.getCountries();
-      console.log(countries);
       gj = new_gj;
     } catch (err) {
       window.alert(`Failed to open file: ${err}`);
