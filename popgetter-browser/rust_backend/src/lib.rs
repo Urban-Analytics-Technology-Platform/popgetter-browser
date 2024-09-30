@@ -7,9 +7,8 @@ use std::sync::Once;
 
 use geojson::{Feature, FeatureCollection};
 use log::info;
-use polars::frame::DataFrame;
+use polars::prelude::{JsonFormat, JsonWriter, SerWriter};
 use rand::seq::SliceRandom;
-use serde::Deserialize;
 use serde_json::map::Map;
 use wasm_bindgen::prelude::*;
 
@@ -32,6 +31,7 @@ pub fn get_random_color() -> &'static str {
 #[wasm_bindgen]
 pub struct Backend {
     popgetter: Popgetter,
+    buffer: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -48,12 +48,18 @@ impl Backend {
                 .await
                 .map_err(|err| info!("{err}"))
                 .unwrap(),
+            buffer: Vec::with_capacity(1000000000),
         }
     }
 
     #[wasm_bindgen(js_name = getCountries)]
-    pub async fn countries(&self) -> String {
-        format!("{}", self.popgetter.metadata.countries)
+    pub async fn countries(&mut self) -> String {
+        self.buffer.clear();
+        JsonWriter::new(&mut self.buffer)
+            .with_json_format(JsonFormat::Json)
+            .finish(&mut self.popgetter.metadata.countries)
+            .unwrap();
+        String::from_utf8(self.buffer.to_owned()).unwrap()
     }
 
     /// Add a property called 'color' to each feature in the input GeoJSON. The value is a random

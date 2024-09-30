@@ -38,9 +38,7 @@ export class RustBackend {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }
-    // TODO: implement DataFrame to JSON or add popgetter GeoJSONFormatter
-    // const result = JSON.parse(await this.inner!.getCountries());
-    const result = (await this.inner!.getCountries());
+    const result = JSON.parse(await this.inner!.getCountries());
     console.log("RustBackend.getCountries result", result);
     return result;
   }
