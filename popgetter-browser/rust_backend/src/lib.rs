@@ -7,12 +7,19 @@ use std::sync::Once;
 
 use geojson::{Feature, FeatureCollection};
 use log::info;
-use polars::prelude::{JsonFormat, JsonWriter, SerWriter};
+use polars::{
+    frame::DataFrame,
+    prelude::{JsonFormat, JsonWriter, SerWriter},
+};
 use rand::seq::SliceRandom;
 use serde_json::map::Map;
 use wasm_bindgen::prelude::*;
 
-use popgetter::Popgetter;
+use popgetter::{
+    data_request_spec::DataRequestSpec,
+    search::{Params, SearchParams},
+    Popgetter,
+};
 
 use self::timer::Timer;
 
@@ -36,6 +43,15 @@ pub struct Backend {
 
 #[wasm_bindgen]
 impl Backend {
+    fn write_json(&mut self, mut dataframe: DataFrame) -> String {
+        self.buffer.clear();
+        JsonWriter::new(&mut self.buffer)
+            .with_json_format(JsonFormat::Json)
+            .finish(&mut dataframe)
+            .unwrap();
+        String::from_utf8(self.buffer.to_owned()).unwrap()
+    }
+
     #[wasm_bindgen(constructor)]
     pub async fn new() -> Backend {
         // Panics shouldn't happen, but if they do, console.log them.
@@ -54,12 +70,57 @@ impl Backend {
 
     #[wasm_bindgen(js_name = getCountries)]
     pub async fn countries(&mut self) -> String {
-        self.buffer.clear();
-        JsonWriter::new(&mut self.buffer)
-            .with_json_format(JsonFormat::Json)
-            .finish(&mut self.popgetter.metadata.countries)
-            .unwrap();
-        String::from_utf8(self.buffer.to_owned()).unwrap()
+        self.write_json(self.popgetter.metadata.countries.clone())
+    }
+
+    #[wasm_bindgen(js_name = search)]
+    pub async fn search(&mut self, search_params_js_map: Option<js_sys::Map>) -> String {
+        // TODO: fix unwraps
+        let search_params: SearchParams =
+            serde_wasm_bindgen::from_value(search_params_js_map.into()).unwrap();
+        self.write_json(self.popgetter.search(&search_params).0)
+    }
+
+    #[wasm_bindgen(js_name = downloadMetrics)]
+    pub async fn download_metrics(&mut self, params_js_map: Option<js_sys::Map>) -> String {
+        // TODO: fix unwraps
+        let params: Params = serde_wasm_bindgen::from_value(params_js_map.into()).unwrap();
+        self.popgetter.download_metrics_sql(&params).await.unwrap()
+    }
+
+    #[wasm_bindgen(js_name = downloadGeoms)]
+    pub async fn download_geoms(&mut self, params_js_map: Option<js_sys::Map>) -> String {
+        // TODO: fix unwraps
+        let params: Params = serde_wasm_bindgen::from_value(params_js_map.into()).unwrap();
+        self.write_json(self.popgetter.download_geoms(&params).await.unwrap())
+    }
+
+    #[wasm_bindgen(js_name = downloadDataRequestMetrics)]
+    pub async fn download_data_request_metrics(
+        &mut self,
+        data_request_spec_js_map: js_sys::Map,
+    ) -> String {
+        // TODO: fix unwraps
+        let params: Params =
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_map.into())
+                .unwrap()
+                .try_into()
+                .unwrap();
+        self.popgetter.download_metrics_sql(&params).await.unwrap()
+    }
+
+    #[wasm_bindgen(js_name = downloadDataRequestGeoms)]
+    pub async fn download_data_request_geoms(
+        &mut self,
+        data_request_spec_js_map: js_sys::Map,
+    ) -> String {
+        // TODO: fix unwraps
+        let params: Params =
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_map.into())
+                .unwrap()
+                .try_into()
+                .unwrap();
+        self.write_json(self.popgetter.download_geoms(&params).await.unwrap())
     }
 
     /// Add a property called 'color' to each feature in the input GeoJSON. The value is a random
