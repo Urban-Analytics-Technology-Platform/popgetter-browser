@@ -21,22 +21,22 @@ wasm-bindgen = { version = "0.2.92", features = ["strict-macro"] }
 web-sys = { version = "0.3.64", features = ["console"] }
 web-time = "1.1.0"
 rand = "0.8.5"
+flatgeobuf = ">=4.2.1,<4.4"
 getrandom = { version = "0.2.15", features = ["js"] }
 polars = { git = "https://github.com/Urban-Analytics-Technology-Platform/polars.git", branch = "rs-0.42.0-parquet-wasm", default-features = false, features = [
-    "polars-io", "fmt_no_tty", "json"
+    "polars-io",
+    "fmt_no_tty",
+    "json",
 ] }
-# popgetter = { git = "https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git", branch = "73-wasm", default-features = false, features = [
-#     "wasm",
-# ] }
-# popgetter = { git = "https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git", rev = "77bbcee2b0b261158b5f80706ab36236f9c30eaa", default-features = false, features = [
-popgetter = { git = "https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git", branch="73-wasm-rebase", default-features = false, features = [
-    "wasm", "formatters"
+popgetter = { git = "https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git", rev = "a48e4f1b4db61d924ea54a3f61cdad8ed83fb728", default-features = false, features = [
+    "wasm",
+    "formatters",
 ] }
 
 wasm-bindgen-futures = "0.4.42"
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.42" # polars = { path = "../../../polars/crates/polars", default-features = false }
+wasm-bindgen-test = "0.3.42"
 
 # For local development, build dependencies in release mode once, but otherwise
 # use dev profile and avoid wasm-opt.
