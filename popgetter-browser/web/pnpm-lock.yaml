@@ -29,6 +29,9 @@ importers:
       maplibre-gl:
         specifier: ^4.3.1
         version: 4.5.0
+      rust_backend:
+        specifier: ../rust_backend/pkg/
+        version: link:../rust_backend/pkg
       svelte-maplibre:
         specifier: git+https://github.com/dabreegster/svelte-maplibre.git#svelte5
         version: https://codeload.github.com/dabreegster/svelte-maplibre/tar.gz/a8c8c9c60d63b71911cef6cfe3cfa1921d123966(svelte@5.0.0-next.201)
