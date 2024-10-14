@@ -13,9 +13,9 @@
     <button on:click={() => ($mode = { kind: "countries" })}
       >Countries</button
     >
-    <!-- <button on:click={() => ($mode = { kind: "search" })}
+    <button on:click={() => ($mode = { kind: "search" })}
       >Search</button
-    > -->
+    >
   </div>
   <div slot="map"></div>
 </SplitComponent>

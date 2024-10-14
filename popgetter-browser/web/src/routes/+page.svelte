@@ -15,6 +15,8 @@
   import { map as mapStore, rustBackend, mode } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
+    import SearchMode from "./SearchMode.svelte";
+
 
   // Everything in this script section is boilerplate; you can ignore it
 
@@ -74,10 +76,9 @@
         <TitleMode />
       {:else if $mode.kind == "countries"}
         <CountriesMode />
-      {/if}
-        <!-- {:else if $mode.kind == "search"}
+      {:else if $mode.kind == "search"}
         <SearchMode />
-      {/if} -->
+      {/if}
     </MapLibre>
   </div>
 </Layout>

@@ -43,11 +43,11 @@ export class RustBackend {
     return result;
   }
 
-  async search(search_params: Map<any, any>): Promise<String> {
+  async search(search_params: Map<any, any>, offset: number): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }
-    const result = JSON.parse(await this.inner!.search(search_params));
+    const result = JSON.parse(await this.inner!.search(search_params, offset));
     // console.log("RustBackend.getCountries result", result);
     return result;
   }

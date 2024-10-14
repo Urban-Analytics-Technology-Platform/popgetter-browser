@@ -25,6 +25,8 @@ use self::timer::Timer;
 
 static START: Once = Once::new();
 
+const MAX_RESULTS: usize = 20;
+
 pub fn get_random_color() -> &'static str {
     let mut rng = rand::thread_rng();
     ["#C28055", "#C91A00", "#D23900", "#FFFFFF", "#F65200"]
@@ -74,35 +76,45 @@ impl Backend {
     }
 
     #[wasm_bindgen(js_name = search)]
-    pub async fn search(&mut self, search_params_js_map: Option<js_sys::Map>) -> String {
+    pub async fn search(&mut self, search_params_js_value: JsValue, offset: u32) -> String {
         // TODO: fix unwraps
+        info!("{:?}", search_params_js_value);
         let search_params: SearchParams =
-            serde_wasm_bindgen::from_value(search_params_js_map.into()).unwrap();
-        self.write_json(self.popgetter.search(&search_params).0)
+            serde_wasm_bindgen::from_value(search_params_js_value).unwrap();
+        self.write_json(
+            self.popgetter
+                .search(&search_params)
+                .0
+                // TODO: fix unwrap
+                .slice(
+                    i64::from(offset) * i64::try_from(MAX_RESULTS).unwrap(),
+                    MAX_RESULTS,
+                ),
+        )
     }
 
     #[wasm_bindgen(js_name = downloadMetrics)]
-    pub async fn download_metrics(&mut self, params_js_map: Option<js_sys::Map>) -> String {
+    pub async fn download_metrics(&mut self, params_js_value: JsValue) -> String {
         // TODO: fix unwraps
-        let params: Params = serde_wasm_bindgen::from_value(params_js_map.into()).unwrap();
+        let params: Params = serde_wasm_bindgen::from_value(params_js_value).unwrap();
         self.popgetter.download_metrics_sql(&params).await.unwrap()
     }
 
     #[wasm_bindgen(js_name = downloadGeoms)]
-    pub async fn download_geoms(&mut self, params_js_map: Option<js_sys::Map>) -> String {
+    pub async fn download_geoms(&mut self, params_js_value: JsValue) -> String {
         // TODO: fix unwraps
-        let params: Params = serde_wasm_bindgen::from_value(params_js_map.into()).unwrap();
+        let params: Params = serde_wasm_bindgen::from_value(params_js_value).unwrap();
         self.write_json(self.popgetter.download_geoms(&params).await.unwrap())
     }
 
     #[wasm_bindgen(js_name = downloadDataRequestMetrics)]
     pub async fn download_data_request_metrics(
         &mut self,
-        data_request_spec_js_map: js_sys::Map,
+        data_request_spec_js_value: JsValue,
     ) -> String {
         // TODO: fix unwraps
         let params: Params =
-            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_map.into())
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value)
                 .unwrap()
                 .try_into()
                 .unwrap();
@@ -112,11 +124,11 @@ impl Backend {
     #[wasm_bindgen(js_name = downloadDataRequestGeoms)]
     pub async fn download_data_request_geoms(
         &mut self,
-        data_request_spec_js_map: js_sys::Map,
+        data_request_spec_js_value: JsValue,
     ) -> String {
         // TODO: fix unwraps
         let params: Params =
-            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_map.into())
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value)
                 .unwrap()
                 .try_into()
                 .unwrap();
@@ -170,14 +182,49 @@ mod tests {
     use super::*;
     use wasm_bindgen_test::*;
 
-    #[wasm_bindgen_test]
-    fn pass() {
-        assert_eq!(1, 1);
-    }
+    const EXAMPLE_DATA_REQUEST_SPEC: &str = r#"{
+        "region": [
+          {
+            "BoundingBox": [-74.251785, 40.647043, -73.673286, 40.91014]
+          }
+        ],
+        "metrics": [
+          {
+            "MetricId": "f29c1976"
+          },
+          {
+            "MetricId": "079f3ba3"
+          },
+          {
+            "MetricId": "81cae95d"
+          },
+          {
+            "MetricText": "Key: uniqueID, Value: B01001_001;"
+          }
+        ],
+        "years": ["2021"],
+        "geometry": {
+          "geometry_level": "tract",
+          "include_geoms": true
+        }
+      }"#;
 
     #[wasm_bindgen_test(async)]
     async fn test_backend() {
         let backend = Backend::new().await;
         info!("{}", backend.popgetter.metadata.countries);
+    }
+
+    #[wasm_bindgen_test(async)]
+    async fn test_search() {
+        let mut backend = Backend::new().await;
+        let search_params = Params::try_from(
+            serde_json::from_str::<DataRequestSpec>(EXAMPLE_DATA_REQUEST_SPEC).unwrap(),
+        )
+        .unwrap()
+        .search;
+        let search_params_js_value = serde_wasm_bindgen::to_value(&search_params).unwrap();
+        let results = backend.search(search_params_js_value, 0).await;
+        info!("{}", results);
     }
 }
