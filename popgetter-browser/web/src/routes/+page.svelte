@@ -6,10 +6,7 @@
   } from "@uatp/components/two_column_layout";
   import { MapLibre } from "svelte-maplibre";
   import TitleMode from "./TitleMode.svelte";
-  import ColourMode from "./ColourMode.svelte";
-  import BubbleChart from "$lib/charts/BubbleChart.svelte";
-  import BarChart from "$lib/charts/BarChart.svelte";
-  import ApiBarChart from "$lib/charts/ApiBarChart.svelte";
+  import CountriesMode from "./CountriesMode.svelte";
 
   import { onMount } from "svelte";
   import type { Map } from "maplibre-gl";
@@ -18,6 +15,8 @@
   import { map as mapStore, rustBackend, mode } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
+    import SearchMode from "./SearchMode.svelte";
+
 
   // Everything in this script section is boilerplate; you can ignore it
 
@@ -60,11 +59,8 @@
 
 <Layout>
   <div slot="left">
-    <h1>A new title!</h1>
+    <h1>Popgetter browser</h1>
     <div bind:this={sidebarDiv}></div>
-    <div><BarChart title="A bar chart" /></div>
-    <div><ApiBarChart title="A bar chart with data from an API" /></div>
-    <div><BubbleChart title="A bubble chart with zoom" /></div>
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
     <MapLibre
@@ -78,8 +74,10 @@
       <!-- When you define new modes, you have to wire them up here -->
       {#if $mode.kind == "title"}
         <TitleMode />
-      {:else if $mode.kind == "colour"}
-        <ColourMode />
+      {:else if $mode.kind == "countries"}
+        <CountriesMode />
+      {:else if $mode.kind == "search"}
+        <SearchMode />
       {/if}
     </MapLibre>
   </div>

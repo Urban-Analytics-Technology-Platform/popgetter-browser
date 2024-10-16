@@ -14,7 +14,7 @@ export class RustBackend {
   async initialise() {
     // It's safe to call this repeatedly
     await init();
-    this.inner = new WasmInterface();
+    this.inner = await new WasmInterface();
   }
 
   unset() {
@@ -31,6 +31,65 @@ export class RustBackend {
     }
     const result = JSON.parse(this.inner!.addColours(gj));
     console.log("RustBackend.addColours result", result);
+    return result;
+  }
+
+  async getCountries(): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = JSON.parse(await this.inner!.getCountries());
+    console.log("RustBackend.getCountries result", result);
+    return result;
+  }
+
+  async search(search_params: Map<any, any>, offset: number): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = JSON.parse(await this.inner!.search(search_params, offset));
+    // console.log("RustBackend.getCountries result", result);
+    return result;
+  }
+
+  async downloadMetrics(params: Map<any, any>): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = JSON.parse(await this.inner!.downloadMetrics(params));
+    // console.log("RustBackend.getCountries result", result);
+    return result;
+  }
+  async downloadGeoms(params: Map<any, any>): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = JSON.parse(await this.inner!.downloadGeoms(params));
+    // console.log("RustBackend.getCountries result", result);
+    return result;
+  }
+  async downloadDataRequestMetrics(
+    data_request_spec: Map<any, any>,
+  ): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = JSON.parse(
+      await this.inner!.downloadDataRequestMetrics(data_request_spec),
+    );
+    // console.log("RustBackend.getCountries result", result);
+    return result;
+  }
+  async downloadDataRequestGeoms(
+    data_request_spec: Map<any, any>,
+  ): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = JSON.parse(
+      await this.inner!.downloadDataRequestGeoms(data_request_spec),
+    );
+    // console.log("RustBackend.getCountries result", result);
     return result;
   }
 }

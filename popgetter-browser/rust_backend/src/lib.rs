@@ -6,14 +6,26 @@ mod timer;
 use std::sync::Once;
 
 use geojson::{Feature, FeatureCollection};
+use log::info;
+use polars::{
+    frame::DataFrame,
+    prelude::{JsonFormat, JsonWriter, SerWriter},
+};
 use rand::seq::SliceRandom;
-use serde::Deserialize;
 use serde_json::map::Map;
 use wasm_bindgen::prelude::*;
+
+use popgetter::{
+    data_request_spec::DataRequestSpec,
+    search::{Params, SearchParams},
+    Popgetter,
+};
 
 use self::timer::Timer;
 
 static START: Once = Once::new();
+
+const MAX_RESULTS: usize = 20;
 
 pub fn get_random_color() -> &'static str {
     let mut rng = rand::thread_rng();
@@ -26,19 +38,101 @@ pub fn get_random_color() -> &'static str {
 // constructor. This file (lib.rs) should handle all the WASM interactions, and most of the logic
 // should happen in other modules.
 #[wasm_bindgen]
-pub struct Backend {}
+pub struct Backend {
+    popgetter: Popgetter,
+    buffer: Vec<u8>,
+}
 
 #[wasm_bindgen]
 impl Backend {
+    fn write_json(&mut self, mut dataframe: DataFrame) -> String {
+        self.buffer.clear();
+        JsonWriter::new(&mut self.buffer)
+            .with_json_format(JsonFormat::Json)
+            .finish(&mut dataframe)
+            .unwrap();
+        String::from_utf8(self.buffer.to_owned()).unwrap()
+    }
+
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Backend {
+    pub async fn new() -> Backend {
         // Panics shouldn't happen, but if they do, console.log them.
         console_error_panic_hook::set_once();
         START.call_once(|| {
             console_log::init_with_level(log::Level::Info).unwrap();
         });
-        initialise(Timer::new("setup backend", None));
-        Backend {}
+        Backend {
+            popgetter: Popgetter::new()
+                .await
+                .map_err(|err| info!("{err}"))
+                .unwrap(),
+            buffer: Vec::with_capacity(1000000000),
+        }
+    }
+
+    #[wasm_bindgen(js_name = getCountries)]
+    pub async fn countries(&mut self) -> String {
+        self.write_json(self.popgetter.metadata.countries.clone())
+    }
+
+    #[wasm_bindgen(js_name = search)]
+    pub async fn search(&mut self, search_params_js_value: JsValue, offset: u32) -> String {
+        // TODO: fix unwraps
+        info!("{:?}", search_params_js_value);
+        let search_params: SearchParams =
+            serde_wasm_bindgen::from_value(search_params_js_value).unwrap();
+        self.write_json(
+            self.popgetter
+                .search(&search_params)
+                .0
+                // TODO: fix unwrap
+                .slice(
+                    i64::from(offset) * i64::try_from(MAX_RESULTS).unwrap(),
+                    MAX_RESULTS,
+                ),
+        )
+    }
+
+    #[wasm_bindgen(js_name = downloadMetrics)]
+    pub async fn download_metrics(&mut self, params_js_value: JsValue) -> String {
+        // TODO: fix unwraps
+        let params: Params = serde_wasm_bindgen::from_value(params_js_value).unwrap();
+        self.popgetter.download_metrics_sql(&params).await.unwrap()
+    }
+
+    #[wasm_bindgen(js_name = downloadGeoms)]
+    pub async fn download_geoms(&mut self, params_js_value: JsValue) -> String {
+        // TODO: fix unwraps
+        let params: Params = serde_wasm_bindgen::from_value(params_js_value).unwrap();
+        self.write_json(self.popgetter.download_geoms(&params).await.unwrap())
+    }
+
+    #[wasm_bindgen(js_name = downloadDataRequestMetrics)]
+    pub async fn download_data_request_metrics(
+        &mut self,
+        data_request_spec_js_value: JsValue,
+    ) -> String {
+        // TODO: fix unwraps
+        let params: Params =
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value)
+                .unwrap()
+                .try_into()
+                .unwrap();
+        self.popgetter.download_metrics_sql(&params).await.unwrap()
+    }
+
+    #[wasm_bindgen(js_name = downloadDataRequestGeoms)]
+    pub async fn download_data_request_geoms(
+        &mut self,
+        data_request_spec_js_value: JsValue,
+    ) -> String {
+        // TODO: fix unwraps
+        let params: Params =
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value)
+                .unwrap()
+                .try_into()
+                .unwrap();
+        self.write_json(self.popgetter.download_geoms(&params).await.unwrap())
     }
 
     /// Add a property called 'color' to each feature in the input GeoJSON. The value is a random
@@ -80,5 +174,57 @@ fn err_to_js<E: std::fmt::Display>(err: E) -> JsValue {
 fn initialise(mut timer: Timer) {
     for step in 0..10 {
         timer.step(format!("do something, step {step}"));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wasm_bindgen_test::*;
+
+    const EXAMPLE_DATA_REQUEST_SPEC: &str = r#"{
+        "region": [
+          {
+            "BoundingBox": [-74.251785, 40.647043, -73.673286, 40.91014]
+          }
+        ],
+        "metrics": [
+          {
+            "MetricId": "f29c1976"
+          },
+          {
+            "MetricId": "079f3ba3"
+          },
+          {
+            "MetricId": "81cae95d"
+          },
+          {
+            "MetricText": "Key: uniqueID, Value: B01001_001;"
+          }
+        ],
+        "years": ["2021"],
+        "geometry": {
+          "geometry_level": "tract",
+          "include_geoms": true
+        }
+      }"#;
+
+    #[wasm_bindgen_test(async)]
+    async fn test_backend() {
+        let backend = Backend::new().await;
+        info!("{}", backend.popgetter.metadata.countries);
+    }
+
+    #[wasm_bindgen_test(async)]
+    async fn test_search() {
+        let mut backend = Backend::new().await;
+        let search_params = Params::try_from(
+            serde_json::from_str::<DataRequestSpec>(EXAMPLE_DATA_REQUEST_SPEC).unwrap(),
+        )
+        .unwrap()
+        .search;
+        let search_params_js_value = serde_wasm_bindgen::to_value(&search_params).unwrap();
+        let results = backend.search(search_params_js_value, 0).await;
+        info!("{}", results);
     }
 }
