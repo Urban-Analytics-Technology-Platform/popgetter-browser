@@ -16,6 +16,7 @@
 
   // let countries_list: Array<Array<String>> = [];
   let countries: Array<Map<any, any>> = [];
+  let selectedCountry: String = "";
   onMount(async () => {
     try {
       const loaded = await $rustBackend!.isLoaded();
@@ -32,7 +33,6 @@
 
   let activeClass =
     "text-green-500 dark:text-green-300 hover:text-green-700 dark:hover:text-green-500";
-  let param = "test";
 </script>
 
 <div>
@@ -53,7 +53,9 @@
   <!-- TODO: save the selection to then be passed to search params -->
   <Dropdown>
     {#each countries as country}
-      <DropdownItem>{country.country_name_short_en}</DropdownItem>
+      <DropdownItem on:click={() => console.log(country.country_name_short_en)}
+        >{country.country_name_short_en}</DropdownItem
+      >
     {/each}
   </Dropdown>
 </div>
