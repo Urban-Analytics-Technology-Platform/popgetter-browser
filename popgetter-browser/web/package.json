@@ -45,13 +45,15 @@
   },
   "dependencies": {
     "@cubejs-client/core": "^0.35.23",
+    "@uatp/components": "0.0.1",
     "chart.js": "^4.4.3",
     "chartjs-plugin-zoom": "^2.0.1",
     "comlink": "^4.4.1",
+    "flowbite-svelte": "^0.47.1",
+    "flowbite-svelte-icons": "^1.6.2",
     "isomorphic-fetch": "^3",
     "maplibre-gl": "^4.3.1",
-    "svelte-maplibre": "git+https://github.com/dabreegster/svelte-maplibre.git#svelte5",
-    "@uatp/components": "0.0.1"
+    "svelte-maplibre": "git+https://github.com/dabreegster/svelte-maplibre.git#svelte5"
   },
   "type": "module"
 }

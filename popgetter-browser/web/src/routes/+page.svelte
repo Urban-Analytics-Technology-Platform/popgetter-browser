@@ -15,8 +15,8 @@
   import { map as mapStore, rustBackend, mode } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
-    import SearchMode from "./SearchMode.svelte";
-
+  import SearchMode from "./SearchMode.svelte";
+  import DownloadMode from "./DownloadMode.svelte";
 
   // Everything in this script section is boilerplate; you can ignore it
 
@@ -78,6 +78,8 @@
         <CountriesMode />
       {:else if $mode.kind == "search"}
         <SearchMode />
+      {:else if $mode.kind == "download"}
+        <DownloadMode />
       {/if}
     </MapLibre>
   </div>

@@ -10,12 +10,17 @@ import { type RustBackend } from "$lib/rust_worker";
 export const map: Writable<Map | null> = writable(null);
 
 // This is the way to call the backend
-export const rustBackend: Writable<Comlink.Remote<RustBackend> | null> = writable(null);
+export const rustBackend: Writable<Comlink.Remote<RustBackend> | null> =
+  writable(null);
 // Indicates the backend has a file loaded and is ready
 export const rustIsLoaded = writable(false);
 
 // Your app should be organized into distinct modes (think of as distinct pages
 // of a site, sharing the same layout). These can have parameters by adding
 // fields to each case.
-export type Mode = { kind: "title" } | { kind: "search" } | { kind: "countries" };
+export type Mode =
+  | { kind: "title" }
+  | { kind: "search" }
+  | { kind: "countries" }
+  | { kind: "download" };
 export const mode: Writable<Mode> = writable({ kind: "title" });
