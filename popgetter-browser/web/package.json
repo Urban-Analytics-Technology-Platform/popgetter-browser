@@ -49,6 +49,7 @@
     "chart.js": "^4.4.3",
     "chartjs-plugin-zoom": "^2.0.1",
     "comlink": "^4.4.1",
+    "duckdb": "^1.1.1",
     "flowbite-svelte": "^0.47.1",
     "flowbite-svelte-icons": "^1.6.2",
     "isomorphic-fetch": "^3",

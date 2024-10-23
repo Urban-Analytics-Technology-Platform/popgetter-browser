@@ -17,6 +17,7 @@ use wasm_bindgen::prelude::*;
 
 use popgetter::{
     data_request_spec::DataRequestSpec,
+    formatters::{GeoJSONFormatter, OutputFormatter, OutputGenerator},
     search::{Params, SearchParams},
     Popgetter,
 };
@@ -104,7 +105,9 @@ impl Backend {
     pub async fn download_geoms(&mut self, params_js_value: JsValue) -> String {
         // TODO: fix unwraps
         let params: Params = serde_wasm_bindgen::from_value(params_js_value).unwrap();
-        self.write_json(self.popgetter.download_geoms(&params).await.unwrap())
+        let mut geoms = self.popgetter.download_geoms(&params).await.unwrap();
+        let geo_formatter = GeoJSONFormatter;
+        geo_formatter.format(&mut geoms).unwrap()
     }
 
     #[wasm_bindgen(js_name = downloadDataRequestMetrics)]
@@ -118,7 +121,9 @@ impl Backend {
                 .unwrap()
                 .try_into()
                 .unwrap();
-        self.popgetter.download_metrics_sql(&params).await.unwrap()
+        let sql = self.popgetter.download_metrics_sql(&params).await.unwrap();
+        info!("{}", sql);
+        sql
     }
 
     #[wasm_bindgen(js_name = downloadDataRequestGeoms)]

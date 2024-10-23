@@ -5,6 +5,7 @@
   import { mode } from "./globals";
   import Search from "../lib/search.svelte";
   import SearchParams from "./SearchParams.svelte";
+  import { writable } from "svelte/store";
 
   async function search(x, offset): Promise<Array<Map<any, any>>> {
     try {
@@ -17,6 +18,44 @@
       return searchResults;
     } catch (err) {
       window.alert(`Failed to search: ${err}`);
+    }
+  }
+
+  async function getMetrics(sqlString: string): Promise<any> {
+    if (sqlString.length > 0) {
+      let data = await fetch(`/api/download?metrics=${sqlString}`)
+        .then((r) => r.json())
+        .then((data) => {
+          console.log("Got result ", data);
+          return data;
+        });
+    }
+    return data;
+  }
+
+  async function download(dataRequestSpec): Promise<Array<Map<any, any>>> {
+    const loaded = await $rustBackend!.isLoaded();
+    if (!loaded) {
+      await $rustBackend!.initialise();
+    }
+    try {
+      let metricsSql: string =
+        await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec);
+
+      // TODO: make the metrics and geoms run concurrently
+      const metrics = await getMetrics(metricsSql);
+      const geoms =
+        await $rustBackend!.downloadDataRequestGeoms(dataRequestSpec);
+
+      // TODO: add client side join here
+      // https://svelte-maplibre.vercel.app/examples/data_join
+
+      console.log(metrics);
+      console.log(geoms);
+      return metrics;
+      // return [];
+    } catch (err) {
+      window.alert(`Failed to download: ${err}`);
     }
   }
 
@@ -52,24 +91,42 @@
     // TODO: update once pagination implemnted
     data = await search(searchParams, 0);
   }
+
+  async function handleClick() {
+    // TODO: replace example data request spec with one derived from a component
+    let dataRequestSpec = {
+      region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
+      metrics: [
+        { MetricId: "f29c1976" },
+        { MetricId: "079f3ba3" },
+        { MetricId: "81cae95d" },
+        { MetricText: "Key: uniqueID, Value: B01001_001;" },
+      ],
+      years: ["2021"],
+      geometry: {
+        geometry_level: "tract",
+        include_geoms: true,
+      },
+    };
+    data = await download(dataRequestSpec);
+  }
 </script>
 
 <SplitComponent>
   <div slot="sidebar">
-    <!-- <SimpleComponent name="Stu" /> -->
-
     <button on:click={() => ($mode = { kind: "title" })}>Return to title</button
     >
-
+    <!-- Search -->
     <section id="query-section">
       <Search bind:searchTerm on:input={handleInput} />
     </section>
 
     <SearchParams></SearchParams>
 
-    <!-- Example search text: -->
-    <!-- Key: uniqueID, Value: B01001_001; -->
+    <!-- Example download for testing -->
+    <button on:click={() => handleClick()}>Example download</button>
 
+    <!-- TODO: convert table for search results into component -->
     <table class="styled-table">
       <thead>
         <tr>

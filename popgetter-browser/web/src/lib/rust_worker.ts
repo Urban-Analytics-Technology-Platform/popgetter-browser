@@ -74,9 +74,8 @@ export class RustBackend {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }
-    const result = JSON.parse(
-      await this.inner!.downloadDataRequestMetrics(data_request_spec),
-    );
+    const result =
+      await this.inner!.downloadDataRequestMetrics(data_request_spec);
     // console.log("RustBackend.getCountries result", result);
     return result;
   }
