@@ -7,20 +7,19 @@ use std::sync::Once;
 
 use geojson::{Feature, FeatureCollection};
 use log::info;
-use polars::{
-    frame::DataFrame,
-    prelude::{JsonFormat, JsonWriter, SerWriter},
-};
+use polars::{frame::DataFrame, prelude::*};
 use rand::seq::SliceRandom;
 use serde_json::map::Map;
 use wasm_bindgen::prelude::*;
 
 use popgetter::{
-    data_request_spec::DataRequestSpec,
+    data_request_spec::{self, DataRequestSpec},
     formatters::{GeoJSONFormatter, OutputFormatter, OutputGenerator},
-    search::{Params, SearchParams},
+    metadata::ExpandedMetadata,
+    search::{Params, SearchParams, SearchResults},
     Popgetter,
 };
+use web_sys::console::info;
 
 use self::timer::Timer;
 
@@ -42,6 +41,19 @@ pub fn get_random_color() -> &'static str {
 pub struct Backend {
     popgetter: Popgetter,
     buffer: Vec<u8>,
+    expanded_metadata_df: DataFrame,
+}
+
+impl Backend {
+    pub fn search_with_cache(&mut self, search_params: &SearchParams) -> SearchResults {
+        // TODO: can we reduce the number of clones?
+        let search_results = search_params
+            .clone()
+            .search(&ExpandedMetadata(self.expanded_metadata_df.clone().lazy()));
+        // Update cached expanded dataframe
+        self.expanded_metadata_df = search_results.0.clone();
+        search_results
+    }
 }
 
 #[wasm_bindgen]
@@ -62,12 +74,20 @@ impl Backend {
         START.call_once(|| {
             console_log::init_with_level(log::Level::Info).unwrap();
         });
+        let popgetter = Popgetter::new()
+            .await
+            .map_err(|err| info!("{err}"))
+            .unwrap();
+        let expanded_metadata_df = popgetter
+            .metadata
+            .combined_metric_source_geometry()
+            .as_df()
+            .collect()
+            .unwrap();
         Backend {
-            popgetter: Popgetter::new()
-                .await
-                .map_err(|err| info!("{err}"))
-                .unwrap(),
+            popgetter,
             buffer: Vec::with_capacity(1000000000),
+            expanded_metadata_df,
         }
     }
 
