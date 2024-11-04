@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FeatureCollection } from "geojson";
   import { SimpleComponent } from "@uatp/components";
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import { rustBackend, rustIsLoaded } from "./globals";
@@ -6,6 +7,7 @@
   import Search from "../lib/search.svelte";
   import SearchParams from "./SearchParams.svelte";
   import { writable } from "svelte/store";
+  import { GeoJSON, FillLayer, LineLayer } from "svelte-maplibre";
 
   async function search(x, offset): Promise<Array<Map<any, any>>> {
     try {
@@ -81,6 +83,12 @@
   // For search results
   let data: Array<Map<any, any>> = [];
 
+  // For downloaded geojson
+  let gj: FeatureCollection = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
   // Function to handle button click
   async function handleInput() {
     // Assign the result of `generateResult` to the `result` variable
@@ -121,7 +129,9 @@
         include_geoms: true,
       },
     };
-    data = await download(dataRequestSpec);
+    // data = await download(dataRequestSpec);
+    gj = await download(dataRequestSpec);
+    console.log(gj);
   }
 </script>
 
@@ -157,7 +167,28 @@
       </tbody>
     </table>
   </div>
-  <div slot="map"></div>
+
+  <!-- Map previews downloaded metrics -->
+  <div slot="map">
+    <GeoJSON data={gj}>
+      <FillLayer
+        paint={{
+          "fill-color": [
+            "interpolate",
+            ["linear"],
+            // Population
+            ["get", "B01001_E001"],
+            0,
+            "#0a0",
+            10000,
+            "#a00",
+          ],
+          "fill-opacity": 0.5,
+        }}
+      />
+      <LineLayer paint={{ "line-color": "black", "line-width": 1 }} />
+    </GeoJSON>
+  </div>
 </SplitComponent>
 
 <!-- CSS Styling -->
