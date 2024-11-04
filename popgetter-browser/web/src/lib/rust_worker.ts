@@ -91,6 +91,16 @@ export class RustBackend {
     // console.log("RustBackend.getCountries result", result);
     return result;
   }
+  async downloadDataRequest(data_request_spec: Map<any, any>): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = JSON.parse(
+      await this.inner!.downloadDataRequest(data_request_spec),
+    );
+    // console.log("RustBackend.getCountries result", result);
+    return result;
+  }
 }
 
 Comlink.expose(RustBackend);

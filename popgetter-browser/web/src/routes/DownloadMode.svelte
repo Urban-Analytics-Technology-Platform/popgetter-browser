@@ -33,27 +33,40 @@
     return data;
   }
 
-  async function download(dataRequestSpec): Promise<Array<Map<any, any>>> {
+  // async function download(dataRequestSpec): Promise<Array<Map<any, any>>> {
+  async function download(dataRequestSpec): Promise<any> {
     const loaded = await $rustBackend!.isLoaded();
     if (!loaded) {
       await $rustBackend!.initialise();
     }
     try {
-      let metricsSql: string =
-        await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec);
-
+      // TODO: consider implementing client side join version of dowload
+      // let metricsSql: string =
+      //   await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec);
       // TODO: make the metrics and geoms run concurrently
-      const metrics = await getMetrics(metricsSql);
-      const geoms =
-        await $rustBackend!.downloadDataRequestGeoms(dataRequestSpec);
+      // const metrics = await getMetrics(metricsSql);
+      // const geoms =
+      //   await $rustBackend!.downloadDataRequestGeoms(dataRequestSpec);
 
       // TODO: add client side join here
       // https://svelte-maplibre.vercel.app/examples/data_join
 
-      console.log(metrics);
-      console.log(geoms);
-      return metrics;
-      // return [];
+      // console.log(metrics);
+      // console.log(geoms);
+
+      // TODO: initial join impl on arrays
+      // const metricsAndGeoms = metrics.map((item1) => ({
+      //   ...metrics,
+      //   ...geoms.get(item1.GEO_ID),
+      // }));
+      // console.log(metricsAndGeoms);
+
+      // Download directly with backend without range requests as not impl for wasm
+      console.log(dataRequestSpec);
+      let metricsAndGeoms =
+        await $rustBackend!.downloadDataRequest(dataRequestSpec);
+      console.log(metricsAndGeoms);
+      return metricsAndGeoms;
     } catch (err) {
       window.alert(`Failed to download: ${err}`);
     }

@@ -130,6 +130,20 @@ impl Backend {
         geo_formatter.format(&mut geoms).unwrap()
     }
 
+    #[wasm_bindgen(js_name = downloadDataRequest)]
+    pub async fn download_data_request(&mut self, data_request_spec_js_value: JsValue) -> String {
+        let data_request_spec =
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value).unwrap();
+
+        let mut geo_df = self
+            .popgetter
+            .download_data_request_spec(&data_request_spec)
+            .await
+            .unwrap();
+        let output_formatter = GeoJSONFormatter;
+        output_formatter.format(&mut geo_df).unwrap()
+    }
+
     #[wasm_bindgen(js_name = downloadDataRequestMetrics)]
     pub async fn download_data_request_metrics(
         &mut self,
@@ -205,6 +219,7 @@ fn initialise(mut timer: Timer) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use popgetter::data_request_spec;
     use wasm_bindgen_test::*;
 
     const EXAMPLE_DATA_REQUEST_SPEC: &str = r#"{
@@ -250,6 +265,18 @@ mod tests {
         .search;
         let search_params_js_value = serde_wasm_bindgen::to_value(&search_params).unwrap();
         let results = backend.search(search_params_js_value, 0).await;
+        info!("{}", results);
+    }
+
+    #[wasm_bindgen_test(async)]
+    async fn test_download() {
+        let mut backend = Backend::new().await;
+        let data_request_spec =
+            serde_json::from_str::<DataRequestSpec>(EXAMPLE_DATA_REQUEST_SPEC).unwrap();
+        let data_request_spec_js_value = serde_wasm_bindgen::to_value(&data_request_spec).unwrap();
+        let results = backend
+            .download_data_request(data_request_spec_js_value)
+            .await;
         info!("{}", results);
     }
 }
