@@ -192,7 +192,7 @@
 </SplitComponent>
 
 <!-- CSS Styling -->
-<style>
+<!-- <style>
   .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -231,4 +231,4 @@
   .styled-table tbody tr:hover {
     background-color: #f1f1f1;
   }
-</style>
+</style> -->
