@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     previewedMetricsList,
+    previewMetricMap,
     rustBackend,
     rustIsLoaded,
     selectedCountry,
@@ -10,6 +11,7 @@
   import { ChevronDownOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
   import {
+    Button,
     Table,
     TableBody,
     TableBodyCell,
@@ -18,6 +20,11 @@
     TableHeadCell,
   } from "flowbite-svelte";
   import { get } from "svelte/store";
+
+  function setPreviewMetricMap(item: Map<any, any>) {
+    console.log("Set preview metric map: ", item);
+    previewMetricMap.set(item);
+  }
 
   async function getMetrics(sqlString: string): Promise<any> {
     if (sqlString.length > 0) {
@@ -83,7 +90,10 @@
     <TableHead>
       <TableHeadCell>GEO_ID</TableHeadCell>
       {#each $selectedMetricsList as item}
-        <TableHeadCell>{item.metric_parquet_column_name}</TableHeadCell>
+        <Button on:click={() => setPreviewMetricMap(item)}
+          ><TableHeadCell>{item.metric_parquet_column_name}</TableHeadCell
+          ></Button
+        >
       {/each}
     </TableHead>
     <TableBody tableBodyClass="divide-y">

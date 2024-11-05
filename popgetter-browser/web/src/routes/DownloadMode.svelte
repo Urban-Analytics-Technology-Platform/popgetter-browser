@@ -2,6 +2,7 @@
   import type { FeatureCollection } from "geojson";
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import {
+    previewMetricMap,
     rustBackend,
     rustIsLoaded,
     selectedCountry,
@@ -176,20 +177,39 @@
 
   async function handleClick() {
     // TODO: replace example data request spec with one derived from a component
+    // let dataRequestSpec = {
+    //   region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
+    //   metrics: [
+    //     { MetricId: { id: "f29c1976" } },
+    //     { MetricId: { id: "079f3ba3" } },
+    //     { MetricId: { id: "81cae95d" } },
+    //     { MetricText: "Key: uniqueID, Value: B01001_001;" },
+    //   ],
+    //   years: ["2021"],
+    //   geometry: {
+    //     geometry_level: "tract",
+    //     include_geoms: true,
+    //   },
+    // };
+
+    // TODO: fix the below data request spec
     let dataRequestSpec = {
       region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
-      metrics: [
-        { MetricId: { id: "f29c1976" } },
-        { MetricId: { id: "079f3ba3" } },
-        { MetricId: { id: "81cae95d" } },
-        { MetricText: "Key: uniqueID, Value: B01001_001;" },
+      metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
+      // years: ["2021"],
+      years: [
+        $previewMetricMap.source_data_release_collection_period_start.slice(
+          0,
+          4,
+        ),
       ],
-      years: ["2021"],
       geometry: {
-        geometry_level: "tract",
+        geometry_level: $selectedLevel,
+        // geometry_level: "tract",
         include_geoms: true,
       },
     };
+    console.log(dataRequestSpec);
     gj = await download(dataRequestSpec);
     console.log(gj);
   }
@@ -235,9 +255,6 @@
         </TableBody>
       </Table>
     </section>
-
-    <!-- Example download for testing -->
-    <button on:click={() => handleClick()}>Example download</button>
   </div>
 
   <!-- Map previews downloaded metrics -->
@@ -286,7 +303,11 @@
           </TabItem>
           <TabItem title="Preview">
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              <b>Preview of selected metrics</b>
+              <b
+                >Preview of selected metrics <button
+                  on:click={() => handleClick()}>(view selected on map)</button
+                ></b
+              >
             </p>
             <PreviewedMetrics></PreviewedMetrics>
           </TabItem>
