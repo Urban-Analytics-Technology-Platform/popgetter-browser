@@ -6,6 +6,7 @@
     rustIsLoaded,
     selectedCountry,
     selectedLevel,
+    selectedMetricsList,
   } from "./globals";
   import { mode } from "./globals";
   import Search from "../lib/search.svelte";
@@ -36,6 +37,7 @@
   import { sineIn } from "svelte/easing";
   import Basket from "./SelectedMetrics.svelte";
   import SelectedMetrics from "./SelectedMetrics.svelte";
+  import PreviewedMetrics from "./PreviewedMetrics.svelte";
 
   let hidden8 = false;
   let transitionParamsBottom = {
@@ -44,15 +46,20 @@
     easing: sineIn,
   };
 
-  function add(s: string) {
-    // TODO
-    console.log(s);
+  function add(record: Map<any, any>) {
+    console.log(record);
+    $selectedMetricsList.indexOf(record) === -1
+      ? $selectedMetricsList.push(record)
+      : console.log("Not added");
     return;
   }
 
-  function remove(s: string) {
-    // TODO
-    console.log(s);
+  export function remove(record: Map<any, any>) {
+    console.log(record);
+    const index = $selectedMetricsList.indexOf(record);
+    if (index > -1) {
+      $selectedMetricsList.splice(index, 1);
+    }
     return;
   }
 
@@ -220,8 +227,8 @@
                 )}</TableBodyCell
               >
               <TableBodyCell>
-                <Button on:click={() => add(item.metric_id)}>Add</Button>
-                <Button on:click={() => remove(item.metric_id)}>Remove</Button>
+                <Button on:click={() => add(item)}>Add</Button>
+                <Button on:click={() => remove(item)}>Remove</Button>
               </TableBodyCell>
             </TableBodyRow>
           {/each}
@@ -279,8 +286,9 @@
           </TabItem>
           <TabItem title="Preview">
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              <b>Preview of the metrics selected:</b>
+              <b>Preview of selected metrics</b>
             </p>
+            <PreviewedMetrics></PreviewedMetrics>
           </TabItem>
         </Tabs>
       </Drawer>
@@ -291,14 +299,14 @@
 <style>
   .overlay {
     /* vertical-align: bottom; */
-    /* position: absolute; */
+    position: absolute;
     /* bottom: 100%; */
-    /* left: 0px; */
+    left: 0px;
     /* left: 27%; */
-    /* width: 50%; */
+    width: 75%;
     /* height: 20%; */
     /* width: 10%; */
-    /* z-index: 500; */
+    z-index: 500;
     /* opacity: 100%; */
 
     /* border-radius: 5px; */

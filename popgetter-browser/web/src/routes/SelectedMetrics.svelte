@@ -28,9 +28,12 @@
   } from "flowbite-svelte";
   import { get } from "svelte/store";
 
-  function remove(s: string) {
-    // TODO
-    console.log(s);
+  function remove(record: Map<any, any>) {
+    console.log(record);
+    const index = $selectedMetricsList.indexOf(record);
+    if (index > -1) {
+      $selectedMetricsList.splice(index, 1);
+    }
     return;
   }
 </script>
@@ -56,7 +59,7 @@
             )}</TableBodyCell
           >
           <TableBodyCell>
-            <Button on:click={() => remove(item.metric_id)}>Remove</Button>
+            <Button on:click={() => remove(item)}>Remove</Button>
           </TableBodyCell>
         </TableBodyRow>
       {/each}

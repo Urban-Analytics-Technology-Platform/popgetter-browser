@@ -24,3 +24,6 @@ export const mode: Writable<Mode> = writable({ kind: "title" });
 export const selectedCountry: Writable<String> = writable("");
 export const selectedLevel: Writable<String> = writable("");
 export const selectedMetricsList: Writable<Array<Map<any, any>>> = writable([]);
+export const previewedMetricsList: Writable<Array<Map<any, any>>> = writable(
+  [],
+);

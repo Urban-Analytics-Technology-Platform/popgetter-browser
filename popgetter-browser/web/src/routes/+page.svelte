@@ -6,7 +6,6 @@
   } from "@uatp/components/two_column_layout";
   import { MapLibre } from "svelte-maplibre";
   import TitleMode from "./TitleMode.svelte";
-  import CountriesMode from "./CountriesMode.svelte";
 
   import { onMount } from "svelte";
   import type { Map } from "maplibre-gl";

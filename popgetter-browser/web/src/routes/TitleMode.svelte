@@ -20,7 +20,6 @@
     Dropdown,
     DropdownItem,
   } from "flowbite-svelte";
-  import SearchParams from "./SearchParams.svelte";
 
   import { ChevronDownOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
@@ -51,7 +50,6 @@
 <SplitComponent>
   <div slot="sidebar">
     <div>
-      <!-- <SearchParams></SearchParams> -->
       <Button
         >Country<ChevronDownOutline />
         <!-- TODO: save the selection to then be passed to search params -->

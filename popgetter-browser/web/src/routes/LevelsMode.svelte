@@ -2,7 +2,6 @@
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import { rustBackend, rustIsLoaded } from "./globals";
   import { mode, selectedCountry, selectedLevel } from "./globals";
-  import SearchParams from "./SearchParams.svelte";
   import { Button, Dropdown, DropdownItem } from "flowbite-svelte";
   import { ChevronDownOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
@@ -44,7 +43,6 @@
 <SplitComponent>
   <div slot="sidebar">
     <div>
-      <!-- <SearchParams></SearchParams> -->
       <Button
         >Geometry level<ChevronDownOutline />
         <Dropdown>
