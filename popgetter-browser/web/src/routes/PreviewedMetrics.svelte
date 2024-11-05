@@ -68,6 +68,7 @@
 
       const metrics = await downloadMetrics(dataRequestSpec);
       $previewedMetricsList = metrics;
+
       console.log("Test");
       console.log($previewedMetricsList.slice(0, 10));
       return;
@@ -88,8 +89,9 @@
     <TableBody tableBodyClass="divide-y">
       {#each $previewedMetricsList.slice(0, 20) as item}
         <TableBodyRow>
-          <!-- TODO: fix loop as over object not array-->
-          {#each item as el}
+          {#each Object.keys(item).map(function (key) {
+            return item[key];
+          }) as el}
             <TableBodyCell>{el}</TableBodyCell>
           {/each}
         </TableBodyRow>
