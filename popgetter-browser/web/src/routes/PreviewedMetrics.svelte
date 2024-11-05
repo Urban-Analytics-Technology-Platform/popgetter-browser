@@ -94,7 +94,7 @@
     <TableHead>
       <TableHeadCell>GEO_ID</TableHeadCell>
       {#each $selectedMetricsList as item}
-        <TableHeadCell>item.metric_parquet_column_name</TableHeadCell>
+        <TableHeadCell>{item.metric_parquet_column_name}</TableHeadCell>
       {/each}
     </TableHead>
     <TableBody tableBodyClass="divide-y">

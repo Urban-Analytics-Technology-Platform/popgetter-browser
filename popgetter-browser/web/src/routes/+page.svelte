@@ -45,8 +45,9 @@
     rustBackend.set(rustBackendWorker);
   });
 
-  selectedCountry.set("United States");
-  selectedLevel.set("tract");
+  // For debugging
+  // selectedCountry.set("United States");
+  // selectedLevel.set("tract");
 
   let map: Map | undefined = undefined;
   $: if (map) {
@@ -85,15 +86,15 @@
 
       <!-- When you define new modes, you have to wire them up here -->
 
-      <!-- {#if $mode.kind == "title"}
+      {#if $mode.kind == "title"}
         <TitleMode />
       {:else if $mode.kind == "level"}
         <LevelsMode />
       {:else if $mode.kind == "download"}
         <DownloadMode />
-      {/if} -->
+      {/if}
 
-      <DownloadMode />
+      <!-- <DownloadMode /> -->
     </MapLibre>
   </div>
 </Layout>
