@@ -1,22 +1,29 @@
 <script lang="ts">
-  // import { SimpleComponent } from "@uatp/components";
-  // import { SplitComponent } from "@uatp/components/two_column_layout";
-  import { rustBackend, rustIsLoaded } from "./globals";
+  import {
+    rustBackend,
+    rustIsLoaded,
+    selectedCountry,
+    selectedLevel,
+  } from "./globals";
   import { ChevronDownOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
-  // import { mode } from "./globals";
   import {
     Button,
     Dropdown,
     DropdownItem,
-    DropdownHeader,
-    DropdownDivider,
+    GradientButton,
   } from "flowbite-svelte";
-  import Search from "../lib/search.svelte";
 
-  // let countries_list: Array<Array<String>> = [];
   let countries: Array<Map<any, any>> = [];
-  let selectedCountry: String = "";
+  let levelsList: [] = [];
+  let levels = {
+    "United States": ["tract", "county", "block_group"],
+    Scotland: ["OutputArea2011", "CouncilArea2011", "DataZone2011"],
+    "Northern Ireland": ["LGD14", "DZ21", "SDZ21"],
+    "England and Wales": ["msoa", "lsoa", "rgn", "oa", "ctry", "ltla"],
+    Belgium: ["statistical_sector", "municipality"],
+  };
+
   onMount(async () => {
     try {
       const loaded = await $rustBackend!.isLoaded();
@@ -31,34 +38,43 @@
     }
   });
 
-  let activeClass =
-    "text-green-500 dark:text-green-300 hover:text-green-700 dark:hover:text-green-500";
+  function setCountryAndLevelsList(country: String) {
+    $selectedCountry = country;
+    levelsList = levels[country];
+    console.log("Selected country: ", selectedCountry);
+    console.log("Selected level: ", selectedLevel);
+  }
+  function setLevel(level: String) {
+    $selectedLevel = level;
+    console.log("Selected country: ", selectedCountry);
+    console.log("Selected level: ", selectedLevel);
+  }
 </script>
 
 <div>
-  <!-- <section id="query-section">
-    <Search bind:searchTerm on:input={handleInput} />
-  </section> -->
-
-  <!-- <Button
-    >Dropdown button<ChevronDownOutline
-      class="w-6 h-6 ms-2 text-white dark:text-white"
-    /></Button
-  > -->
   <Button
-    >Dropdown button<ChevronDownOutline
-      class="w-6 h-6 ms-2 text-white dark:text-white"
-    /></Button
-  >
-  <!-- TODO: save the selection to then be passed to search params -->
-  <Dropdown>
-    {#each countries as country}
-      <DropdownItem on:click={() => console.log(country.country_name_short_en)}
-        >{country.country_name_short_en}</DropdownItem
-      >
-    {/each}
-  </Dropdown>
+    >Country<ChevronDownOutline />
+    <!-- TODO: save the selection to then be passed to search params -->
+    <Dropdown>
+      {#each countries as country}
+        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+          <DropdownItem
+            on:click={() =>
+              setCountryAndLevelsList(country.country_name_short_en)}
+            >{country.country_name_short_en}
+          </DropdownItem>
+        </li>
+      {/each}
+    </Dropdown>
+  </Button>
+  <Button class="ms-2 h-6 w-6 text-black dark:text-white"
+    >Geometry level<ChevronDownOutline />
+    <Dropdown>
+      {#each levelsList as level}
+        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+          <DropdownItem on:click={() => setLevel(level)}>{level}</DropdownItem>
+        </li>
+      {/each}
+    </Dropdown>
+  </Button>
 </div>
-<!-- <section id="country-section">
-      <Search bind:searchTerm on:input={handleInput} />
-    </section> -->

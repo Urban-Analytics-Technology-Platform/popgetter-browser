@@ -18,9 +18,8 @@ export const rustIsLoaded = writable(false);
 // Your app should be organized into distinct modes (think of as distinct pages
 // of a site, sharing the same layout). These can have parameters by adding
 // fields to each case.
-export type Mode =
-  | { kind: "title" }
-  | { kind: "search" }
-  | { kind: "countries" }
-  | { kind: "download" };
+export type Mode = { kind: "title" } | { kind: "level" } | { kind: "download" };
+
 export const mode: Writable<Mode> = writable({ kind: "title" });
+export const selectedCountry: Writable<String> = writable("");
+export const selectedLevel: Writable<String> = writable("");

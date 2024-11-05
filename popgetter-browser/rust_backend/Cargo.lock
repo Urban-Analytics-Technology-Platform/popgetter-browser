@@ -1951,7 +1951,7 @@ dependencies = [
 [[package]]
 name = "popgetter"
 version = "0.1.0"
-source = "git+https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git?rev=a48e4f1b4db61d924ea54a3f61cdad8ed83fb728#a48e4f1b4db61d924ea54a3f61cdad8ed83fb728"
+source = "git+https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git?rev=91ce59540e59a1799b1807b2dd72a08c630879f3#91ce59540e59a1799b1807b2dd72a08c630879f3"
 dependencies = [
  "anyhow",
  "chrono",

@@ -15,8 +15,8 @@
   import { map as mapStore, rustBackend, mode } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
-  import SearchMode from "./SearchMode.svelte";
   import DownloadMode from "./DownloadMode.svelte";
+  import LevelsMode from "./LevelsMode.svelte";
 
   // Everything in this script section is boilerplate; you can ignore it
 
@@ -59,7 +59,11 @@
 
 <Layout>
   <div slot="left">
-    <h1>Popgetter browser</h1>
+    <h1
+      class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white"
+    >
+      Popgetter browser
+    </h1>
     <div bind:this={sidebarDiv}></div>
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
@@ -74,10 +78,8 @@
       <!-- When you define new modes, you have to wire them up here -->
       {#if $mode.kind == "title"}
         <TitleMode />
-      {:else if $mode.kind == "countries"}
-        <CountriesMode />
-      {:else if $mode.kind == "search"}
-        <SearchMode />
+      {:else if $mode.kind == "level"}
+        <LevelsMode />
       {:else if $mode.kind == "download"}
         <DownloadMode />
       {/if}

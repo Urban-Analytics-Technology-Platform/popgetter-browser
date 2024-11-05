@@ -28,7 +28,7 @@ polars = { git = "https://github.com/Urban-Analytics-Technology-Platform/polars.
     "fmt_no_tty",
     "json",
 ] }
-popgetter = { git = "https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git", rev = "a48e4f1b4db61d924ea54a3f61cdad8ed83fb728", default-features = false, features = [
+popgetter = { git = "https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git", rev = "91ce59540e59a1799b1807b2dd72a08c630879f3", default-features = false, features = [
     "wasm",
     "formatters",
 ] }

@@ -13,13 +13,12 @@ use serde_json::map::Map;
 use wasm_bindgen::prelude::*;
 
 use popgetter::{
-    data_request_spec::{self, DataRequestSpec},
-    formatters::{GeoJSONFormatter, OutputFormatter, OutputGenerator},
+    data_request_spec::DataRequestSpec,
+    formatters::{GeoJSONFormatter, OutputGenerator},
     metadata::ExpandedMetadata,
     search::{Params, SearchParams, SearchResults},
     Popgetter,
 };
-use web_sys::console::info;
 
 use self::timer::Timer;
 
@@ -99,7 +98,6 @@ impl Backend {
     #[wasm_bindgen(js_name = search)]
     pub async fn search(&mut self, search_params_js_value: JsValue, offset: u32) -> String {
         // TODO: fix unwraps
-        info!("{:?}", search_params_js_value);
         let search_params: SearchParams =
             serde_wasm_bindgen::from_value(search_params_js_value).unwrap();
         self.write_json(
@@ -224,30 +222,20 @@ mod tests {
 
     const EXAMPLE_DATA_REQUEST_SPEC: &str = r#"{
         "region": [
-          {
-            "BoundingBox": [-74.251785, 40.647043, -73.673286, 40.91014]
-          }
+            {"BoundingBox": [-74.251785, 40.647043, -73.673286, 40.91014]}
         ],
         "metrics": [
-          {
-            "MetricId": "f29c1976"
-          },
-          {
-            "MetricId": "079f3ba3"
-          },
-          {
-            "MetricId": "81cae95d"
-          },
-          {
-            "MetricText": "Key: uniqueID, Value: B01001_001;"
-          }
+            {"MetricId": {"id": "f29c1976"}},
+            {"MetricId": {"id": "079f3ba3"}},
+            {"MetricId": {"id": "81cae95d"}},
+            {"MetricText": "Key: uniqueID, Value: B01001_001;"}
         ],
         "years": ["2021"],
         "geometry": {
-          "geometry_level": "tract",
-          "include_geoms": true
+            "geometry_level": "tract",
+            "include_geoms": true
         }
-      }"#;
+    }"#;
 
     #[wasm_bindgen_test(async)]
     async fn test_backend() {
