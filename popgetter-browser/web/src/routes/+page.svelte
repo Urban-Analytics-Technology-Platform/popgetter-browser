@@ -12,7 +12,13 @@
   import type { Map } from "maplibre-gl";
   import * as Comlink from "comlink";
 
-  import { map as mapStore, rustBackend, mode } from "./globals";
+  import {
+    map as mapStore,
+    rustBackend,
+    mode,
+    selectedCountry,
+    selectedLevel,
+  } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
   import DownloadMode from "./DownloadMode.svelte";
@@ -39,6 +45,9 @@
     let rustBackendWorker = await new MyRustWorker();
     rustBackend.set(rustBackendWorker);
   });
+
+  selectedCountry.set("United States");
+  selectedLevel.set("tract");
 
   let map: Map | undefined = undefined;
   $: if (map) {
@@ -76,13 +85,16 @@
       <div bind:this={mapDiv}></div>
 
       <!-- When you define new modes, you have to wire them up here -->
-      {#if $mode.kind == "title"}
+
+      <!-- {#if $mode.kind == "title"}
         <TitleMode />
       {:else if $mode.kind == "level"}
         <LevelsMode />
       {:else if $mode.kind == "download"}
         <DownloadMode />
-      {/if}
+      {/if} -->
+
+      <DownloadMode />
     </MapLibre>
   </div>
 </Layout>

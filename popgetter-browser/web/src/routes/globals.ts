@@ -23,3 +23,4 @@ export type Mode = { kind: "title" } | { kind: "level" } | { kind: "download" };
 export const mode: Writable<Mode> = writable({ kind: "title" });
 export const selectedCountry: Writable<String> = writable("");
 export const selectedLevel: Writable<String> = writable("");
+export const selectedMetricsList: Writable<Array<Map<any, any>>> = writable([]);

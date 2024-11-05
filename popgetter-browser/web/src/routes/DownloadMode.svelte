@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
-  import { SimpleComponent } from "@uatp/components";
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import {
     rustBackend,
@@ -10,8 +9,6 @@
   } from "./globals";
   import { mode } from "./globals";
   import Search from "../lib/search.svelte";
-  import SearchParams from "./SearchParams.svelte";
-  import { writable } from "svelte/store";
   import { GeoJSON, FillLayer, LineLayer } from "svelte-maplibre";
   import {
     Button,
@@ -22,7 +19,30 @@
     TableBodyRow,
     TableHead,
     TableHeadCell,
+    Drawer,
+    CloseButton,
+    Navbar,
+    NavBrand,
+    NavLi,
+    NavUl,
+    NavHamburger,
+    A,
+    TabItem,
+    Tabs,
   } from "flowbite-svelte";
+
+  import { InfoCircleSolid, ArrowRightOutline } from "flowbite-svelte-icons";
+
+  import { sineIn } from "svelte/easing";
+  import Basket from "./SelectedMetrics.svelte";
+  import SelectedMetrics from "./SelectedMetrics.svelte";
+
+  let hidden8 = false;
+  let transitionParamsBottom = {
+    y: 320,
+    duration: 200,
+    easing: sineIn,
+  };
 
   function add(s: string) {
     // TODO
@@ -170,9 +190,11 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <!-- <button on:click={() => ($mode = { kind: "title" })}>Return to title</button
-    > -->
-    <Button on:click={() => ($mode = { kind: "title" })}>Back to title</Button>
+    <div class="text-left">
+      <Button on:click={() => ($mode = { kind: "title" })}>Home</Button>
+      <Button on:click={() => (hidden8 = false)}>Preview</Button>
+    </div>
+
     <!-- Search -->
     <section id="query-section">
       <Search bind:searchTerm on:input={handleInput} />
@@ -182,9 +204,6 @@
     <section id="<results-table">
       <Table>
         <TableHead>
-          <!-- <TableHeadCell class="!p-4">
-            <Checkbox />
-          </TableHeadCell> -->
           <TableHeadCell>ID</TableHeadCell>
           <TableHeadCell>Name</TableHeadCell>
           <TableHeadCell>Year</TableHeadCell>
@@ -234,5 +253,55 @@
       />
       <LineLayer paint={{ "line-color": "black", "line-width": 1 }} />
     </GeoJSON>
-  </div></SplitComponent
->
+
+    <div class="overlay">
+      <Drawer
+        placement="bottom"
+        width="w-full"
+        transitionType="fly"
+        activateClickOutside={false}
+        transitionParams={transitionParamsBottom}
+        divClass="overflow-y-auto z-50 p-4 bg-white bg-opacity-90 dark:bg-gray-800"
+        backdrop={false}
+        bind:hidden={hidden8}
+        id="sidebar8"
+      >
+        <CloseButton
+          on:click={() => (hidden8 = true)}
+          class="mb-4 dark:text-white"
+        />
+        <Tabs>
+          <TabItem open title="Selected Metrics">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              <b>Selected metrics</b>
+            </p>
+            <SelectedMetrics></SelectedMetrics>
+          </TabItem>
+          <TabItem title="Preview">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              <b>Preview of the metrics selected:</b>
+            </p>
+          </TabItem>
+        </Tabs>
+      </Drawer>
+    </div>
+  </div>
+</SplitComponent>
+
+<style>
+  .overlay {
+    /* vertical-align: bottom; */
+    /* position: absolute; */
+    /* bottom: 100%; */
+    /* left: 0px; */
+    /* left: 27%; */
+    /* width: 50%; */
+    /* height: 20%; */
+    /* width: 10%; */
+    /* z-index: 500; */
+    /* opacity: 100%; */
+
+    /* border-radius: 5px; */
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
+  }
+</style>
