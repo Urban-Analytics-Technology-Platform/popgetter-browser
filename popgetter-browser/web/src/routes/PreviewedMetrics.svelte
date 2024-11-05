@@ -10,22 +10,12 @@
   import { ChevronDownOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
   import {
-    Button,
-    Dropdown,
-    DropdownItem,
-    GradientButton,
-    Checkbox,
     Table,
     TableBody,
     TableBodyCell,
     TableBodyRow,
     TableHead,
     TableHeadCell,
-    Drawer,
-    CloseButton,
-    A,
-    TabItem,
-    Tabs,
   } from "flowbite-svelte";
   import { get } from "svelte/store";
 
@@ -74,14 +64,12 @@
         region: [],
         metrics: metricsDownload,
         years: [],
-        geometry: {
-          geometry_level: $selectedLevel,
-          include_geoms: true,
-        },
       };
 
       const metrics = await downloadMetrics(dataRequestSpec);
       $previewedMetricsList = metrics;
+      console.log("Test");
+      console.log($previewedMetricsList.slice(0, 10));
       return;
     } catch (err) {
       window.alert(`Failed to get countries: ${err}`);
@@ -98,8 +86,9 @@
       {/each}
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-      {#each $previewedMetricsList as item}
+      {#each $previewedMetricsList.slice(0, 20) as item}
         <TableBodyRow>
+          <!-- TODO: fix loop as over object not array-->
           {#each item as el}
             <TableBodyCell>{el}</TableBodyCell>
           {/each}
