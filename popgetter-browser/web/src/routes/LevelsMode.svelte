@@ -3,7 +3,10 @@
   import { rustBackend, rustIsLoaded } from "./globals";
   import { mode, selectedCountry, selectedLevel } from "./globals";
   import { Button, Dropdown, DropdownItem } from "flowbite-svelte";
-  import { ChevronDownOutline } from "flowbite-svelte-icons";
+  import {
+    ChevronRightOutline,
+    ChevronDownOutline,
+  } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
 
   const levels = {
@@ -43,18 +46,28 @@
 <SplitComponent>
   <div slot="sidebar">
     <div>
-      <Button
-        >Geometry level<ChevronDownOutline />
-        <Dropdown>
-          {#each levelsList as level}
-            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-              <DropdownItem on:click={() => setLevel(level)}
-                >{level}</DropdownItem
-              >
-            </li>
-          {/each}
-        </Dropdown>
-      </Button>
+      <Button>
+        <div>
+          <h2
+            class="font-large text-lg text-gray-500 lg:text-xl dark:text-gray-400"
+          >
+            <p>Pick geometry level...</p>
+          </h2>
+          <ChevronRightOutline
+            color="grey"
+            size="lg"
+            class="text-grey ms-2 h-6 w-6 dark:text-white"
+          />
+        </div></Button
+      >
+      <Dropdown>
+        {#each levelsList as level}
+          <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+            <DropdownItem on:click={() => setLevel(level)}>{level}</DropdownItem
+            >
+          </li>
+        {/each}
+      </Dropdown>
     </div>
   </div>
 </SplitComponent>

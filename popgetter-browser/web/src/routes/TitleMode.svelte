@@ -21,7 +21,10 @@
     DropdownItem,
   } from "flowbite-svelte";
 
-  import { ChevronDownOutline } from "flowbite-svelte-icons";
+  import {
+    ChevronRightOutline,
+    ChevronDownOutline,
+  } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
 
   function setCountryAndLevelsList(country: String) {
@@ -50,22 +53,32 @@
 <SplitComponent>
   <div slot="sidebar">
     <div>
-      <Button
-        >Country<ChevronDownOutline />
-        <!-- TODO: save the selection to then be passed to search params -->
-        <Dropdown>
-          {#each countries as country}
-            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-              <DropdownItem
-                on:click={() =>
-                  setCountryAndLevelsList(country.country_name_short_en)}
-                >{country.country_name_short_en}
-              </DropdownItem>
-            </li>
-          {/each}
-        </Dropdown>
-      </Button>
+      <Button>
+        <div>
+          <h2
+            class="font-large text-lg text-gray-500 lg:text-xl dark:text-gray-400"
+          >
+            <p>Pick country...</p>
+          </h2>
+          <ChevronRightOutline
+            color="grey"
+            size="lg"
+            class="text-grey ms-2 h-6 w-6 dark:text-white"
+          />
+        </div></Button
+      >
+      <!-- TODO: save the selection to then be passed to search params -->
+      <Dropdown placement="right-start">
+        {#each countries as country}
+          <DropdownItem
+            on:click={() =>
+              setCountryAndLevelsList(country.country_name_short_en)}
+            >{country.country_name_short_en}
+          </DropdownItem>
+        {/each}
+      </Dropdown>
     </div>
+    <!-- <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600"></li> -->
     <!-- <div>
       <Button color="light" on:click={() => ($mode = { kind: "download" })}
         >Search and Download<ChevronDoubleRightOutline /></Button
