@@ -45,7 +45,7 @@
   <div slot="sidebar">
     <div>
       <!-- <SearchParams></SearchParams> -->
-      <Button class="ms-2 h-6 w-6 text-black dark:text-white"
+      <Button
         >Geometry level<ChevronDownOutline />
         <Dropdown>
           {#each levelsList as level}
