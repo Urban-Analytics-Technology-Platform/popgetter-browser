@@ -4,7 +4,6 @@
   import {
     previewMetricMap,
     rustBackend,
-    rustIsLoaded,
     selectedCountry,
     selectedLevel,
     selectedMetricsList,
@@ -14,7 +13,6 @@
   import { GeoJSON, FillLayer, LineLayer } from "svelte-maplibre";
   import {
     Button,
-    Checkbox,
     Table,
     TableBody,
     TableBodyCell,
@@ -23,20 +21,11 @@
     TableHeadCell,
     Drawer,
     CloseButton,
-    Navbar,
-    NavBrand,
-    NavLi,
-    NavUl,
-    NavHamburger,
-    A,
     TabItem,
     Tabs,
   } from "flowbite-svelte";
 
-  import { InfoCircleSolid, ArrowRightOutline } from "flowbite-svelte-icons";
-
   import { sineIn } from "svelte/easing";
-  import Basket from "./SelectedMetrics.svelte";
   import SelectedMetrics from "./SelectedMetrics.svelte";
   import PreviewedMetrics from "./PreviewedMetrics.svelte";
 
@@ -175,6 +164,23 @@
     console.log(data);
   }
 
+  let min = Infinity;
+  let max = -Infinity;
+
+  // Function to load GeoJSON data and calculate min/max
+  function setMinMax() {
+    const values = gj.features.map(
+      (feature) =>
+        feature.properties[
+          String($previewMetricMap.metric_parquet_column_name)
+        ],
+    );
+    min = Math.min(...values);
+    max = Math.max(...values);
+    console.log(min);
+    console.log(max);
+  }
+
   async function handleClick() {
     let dataRequestSpec = {
       region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
@@ -182,7 +188,9 @@
     };
     console.log(dataRequestSpec);
     gj = await download(dataRequestSpec);
+    console.log($previewMetricMap.metric_parquet_column_name);
     console.log(gj);
+    setMinMax();
   }
 </script>
 
@@ -229,6 +237,7 @@
   </div>
 
   <!-- Map previews downloaded metrics -->
+
   <div slot="map">
     <GeoJSON data={gj}>
       <FillLayer
@@ -237,13 +246,13 @@
             "interpolate",
             ["linear"],
             // TODO: update to respond to selection
-            ["get", "B01001_E001"],
+            ["get", String($previewMetricMap.metric_parquet_column_name)],
             0,
             "#0a0",
-            10000,
+            Math.floor(max),
             "#a00",
           ],
-          "fill-opacity": 0.5,
+          "fill-opacity": 0.7,
         }}
       />
       <LineLayer paint={{ "line-color": "black", "line-width": 1 }} />
