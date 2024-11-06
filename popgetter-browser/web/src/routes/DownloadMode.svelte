@@ -29,6 +29,7 @@
   import { sineIn } from "svelte/easing";
   import SelectedMetrics from "./SelectedMetrics.svelte";
   import PreviewedMetrics from "./PreviewedMetrics.svelte";
+  import { onMount } from "svelte";
 
   let hidden8 = false;
   let transitionParamsBottom = {
@@ -36,6 +37,15 @@
     duration: 200,
     easing: sineIn,
   };
+
+  onMount(() => {
+    // Event listener to get bounding box on map load and on view change
+    $map.on("load", updateBoundingBox);
+    $map.on("moveend", updateBoundingBox);
+    updateBoundingBox();
+    let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
+    console.log("Bbox", bboxForRequest);
+  });
 
   function add(record: Map<any, any>) {
     console.log(record);
@@ -77,6 +87,18 @@
         });
       return data;
     }
+  }
+
+  // Using bbox
+  let bbox = [];
+  function updateBoundingBox() {
+    const bounds = $map.getBounds();
+    bbox = [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ];
   }
 
   const sourceData = "geojson-data";
@@ -192,9 +214,10 @@
   }
 
   async function handleClick() {
-    // TODO: update to use Bounding Box from input or selection
+    let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
+    console.log("Bbox", bboxForRequest);
     let dataRequestSpec = {
-      region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
+      region: [{ BoundingBox: bboxForRequest }],
       metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
     };
     console.log(dataRequestSpec);
