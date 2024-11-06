@@ -2,6 +2,7 @@
   import type { FeatureCollection } from "geojson";
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import {
+    map,
     previewMetricMap,
     rustBackend,
     selectedCountry,
@@ -74,10 +75,21 @@
           console.log("Got result ", data);
           return data;
         });
+      return data;
     }
-    return data;
   }
 
+  const sourceData = "geojson-data";
+  const sourceFillLayer = "geojson-layer";
+
+  function removeSource() {
+    if ($map.getLayer(sourceFillLayer)) {
+      $map.removeLayer(sourceFillLayer);
+    }
+    if ($map.getSource(sourceData)) {
+      $map.removeSource(sourceData);
+    }
+  }
   // async function download(dataRequestSpec): Promise<Array<Map<any, any>>> {
   async function download(dataRequestSpec): Promise<any> {
     const loaded = await $rustBackend!.isLoaded();
@@ -164,12 +176,12 @@
     console.log(data);
   }
 
-  let min = Infinity;
-  let max = -Infinity;
+  let min = 0;
+  let max = 0;
 
   // Function to load GeoJSON data and calculate min/max
-  function setMinMax() {
-    const values = gj.features.map(
+  function setMinMax(gj_out) {
+    const values = gj_out.features.map(
       (feature) =>
         feature.properties[
           String($previewMetricMap.metric_parquet_column_name)
@@ -177,20 +189,48 @@
     );
     min = Math.min(...values);
     max = Math.max(...values);
-    console.log(min);
-    console.log(max);
   }
 
   async function handleClick() {
+    // TODO: update to use Bounding Box from input or selection
     let dataRequestSpec = {
       region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
       metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
     };
     console.log(dataRequestSpec);
-    gj = await download(dataRequestSpec);
+    let gj_out = await download(dataRequestSpec);
+    setMinMax(gj_out);
+    gj = gj_out;
+
     console.log($previewMetricMap.metric_parquet_column_name);
     console.log(gj);
-    setMinMax();
+    console.log(min);
+    console.log(max);
+
+    removeSource();
+
+    // TODO: update to use svelte component
+    $map.addSource("geojson-data", {
+      type: "geojson",
+      data: gj,
+    });
+    $map.addLayer({
+      id: "geojson-fill",
+      type: "fill",
+      source: "geojson-data",
+      paint: {
+        "fill-color": [
+          "interpolate",
+          ["linear"],
+          ["get", String($previewMetricMap.metric_parquet_column_name)],
+          0,
+          "#0a0",
+          max,
+          "#a00",
+        ],
+        "fill-opacity": 0.5,
+      },
+    });
   }
 </script>
 
@@ -239,7 +279,8 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <GeoJSON data={gj}>
+    <!-- TODO: update to respond to change in max -->
+    <!-- <GeoJSON data={gj}>
       <FillLayer
         paint={{
           "fill-color": [
@@ -249,14 +290,14 @@
             ["get", String($previewMetricMap.metric_parquet_column_name)],
             0,
             "#0a0",
-            Math.floor(max),
+            max,
             "#a00",
           ],
           "fill-opacity": 0.7,
         }}
       />
-      <LineLayer paint={{ "line-color": "black", "line-width": 1 }} />
-    </GeoJSON>
+      <LineLayer paint={{ "line-color": "black", "line-width": 0.5 }} />
+    </GeoJSON> -->
 
     <div class="overlay">
       <Drawer
