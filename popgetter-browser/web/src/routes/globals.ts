@@ -27,5 +27,4 @@ export const selectedMetricsList: Writable<Array<Map<any, any>>> = writable([]);
 export const previewedMetricsList: Writable<Array<Map<any, any>>> = writable(
   [],
 );
-
 export const previewMetricMap: Writable<Map<any, any>> = writable({});

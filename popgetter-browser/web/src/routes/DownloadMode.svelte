@@ -176,38 +176,9 @@
   }
 
   async function handleClick() {
-    // TODO: replace example data request spec with one derived from a component
-    // let dataRequestSpec = {
-    //   region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
-    //   metrics: [
-    //     { MetricId: { id: "f29c1976" } },
-    //     { MetricId: { id: "079f3ba3" } },
-    //     { MetricId: { id: "81cae95d" } },
-    //     { MetricText: "Key: uniqueID, Value: B01001_001;" },
-    //   ],
-    //   years: ["2021"],
-    //   geometry: {
-    //     geometry_level: "tract",
-    //     include_geoms: true,
-    //   },
-    // };
-
-    // TODO: fix the below data request spec
     let dataRequestSpec = {
       region: [{ BoundingBox: [-74.251785, 40.647043, -73.673286, 40.91014] }],
       metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
-      // years: ["2021"],
-      years: [
-        $previewMetricMap.source_data_release_collection_period_start.slice(
-          0,
-          4,
-        ),
-      ],
-      geometry: {
-        geometry_level: $selectedLevel,
-        // geometry_level: "tract",
-        include_geoms: true,
-      },
     };
     console.log(dataRequestSpec);
     gj = await download(dataRequestSpec);
