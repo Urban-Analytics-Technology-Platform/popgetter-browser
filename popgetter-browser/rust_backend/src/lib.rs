@@ -116,6 +116,16 @@ impl Backend {
     pub async fn download_metrics(&mut self, params_js_value: JsValue) -> String {
         // TODO: fix unwraps
         let params: Params = serde_wasm_bindgen::from_value(params_js_value).unwrap();
+        // self.popgetter.download_metrics_sql(&params).await.unwrap()
+        let metrics_and_geoms = self.popgetter.download_params(&params).await.unwrap();
+        let metrics = metrics_and_geoms.drop("geometry").unwrap();
+        self.write_json(metrics)
+    }
+
+    #[wasm_bindgen(js_name = downloadMetricsSql)]
+    pub async fn download_metrics_sql(&mut self, params_js_value: JsValue) -> String {
+        // TODO: fix unwraps
+        let params: Params = serde_wasm_bindgen::from_value(params_js_value).unwrap();
         self.popgetter.download_metrics_sql(&params).await.unwrap()
     }
 
@@ -144,6 +154,24 @@ impl Backend {
 
     #[wasm_bindgen(js_name = downloadDataRequestMetrics)]
     pub async fn download_data_request_metrics(
+        &mut self,
+        data_request_spec_js_value: JsValue,
+    ) -> String {
+        // TODO: fix unwraps
+        let params: Params =
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value)
+                .unwrap()
+                .try_into()
+                .unwrap();
+        let metrics_and_geoms = self.popgetter.download_params(&params).await.unwrap();
+        let metrics = metrics_and_geoms.drop("geometry").unwrap();
+        let metrics = self.write_json(metrics);
+        info!("{}", metrics);
+        metrics
+    }
+
+    #[wasm_bindgen(js_name = downloadDataRequestMetricsSql)]
+    pub async fn download_data_request_metrics_sql(
         &mut self,
         data_request_spec_js_value: JsValue,
     ) -> String {

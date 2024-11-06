@@ -45,9 +45,18 @@
     }
     try {
       console.log(dataRequestSpec);
-      let metricsSql: string =
-        await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec);
-      const metrics = await getMetrics(metricsSql);
+      // Use only rust_backend to get metrics. Currently this has to
+      // get the whole file so is inefficient as does not use range
+      // request for the selected metrics only
+      let metrics: string = JSON.parse(
+        await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec),
+      );
+
+      // If using the duckdb server for range requests, uncomment the below
+      // but for a static site, this will not work
+      // let metricsSql: string =
+      //   await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
+      // const metrics = await getMetrics(metricsSql);
       console.log(metrics);
       return metrics;
     } catch (err) {
