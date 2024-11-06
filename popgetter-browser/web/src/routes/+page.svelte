@@ -69,7 +69,7 @@
 <Layout>
   <div slot="left">
     <h1
-      class="lg:text-6s md:text-5s mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 dark:text-white"
+      class="lg:text-6s md:text-5s mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 dark:text-gray-900"
     >
       Popgetter browser
     </h1>

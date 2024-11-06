@@ -49,14 +49,14 @@
       <Button>
         <div>
           <h2
-            class="font-large text-lg text-gray-500 lg:text-xl dark:text-gray-400"
+            class="font-large text-lg text-gray-500 lg:text-xl dark:text-gray-500"
           >
             <p>Pick geometry level...</p>
           </h2>
           <ChevronRightOutline
             color="grey"
             size="lg"
-            class="text-grey ms-2 h-6 w-6 dark:text-white"
+            class="text-grey ms-2 h-6 w-6 dark:text-gray-500"
           />
         </div></Button
       >
