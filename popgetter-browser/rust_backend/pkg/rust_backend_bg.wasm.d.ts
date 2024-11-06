@@ -1,0 +1,31 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export function __wbg_backend_free(a: number, b: number): void;
+export function backend_new(): number;
+export function backend_getCountries(a: number): number;
+export function backend_search(a: number, b: number, c: number): number;
+export function backend_downloadMetrics(a: number, b: number): number;
+export function backend_downloadMetricsSql(a: number, b: number): number;
+export function backend_downloadGeoms(a: number, b: number): number;
+export function backend_downloadDataRequest(a: number, b: number): number;
+export function backend_downloadDataRequestMetrics(a: number, b: number): number;
+export function backend_downloadDataRequestMetricsSql(a: number, b: number): number;
+export function backend_downloadDataRequestGeoms(a: number, b: number): number;
+export function backend_addColours(a: number, b: number, c: number): void;
+export function rust_zstd_wasm_shim_qsort(a: number, b: number, c: number, d: number): void;
+export function rust_zstd_wasm_shim_malloc(a: number): number;
+export function rust_zstd_wasm_shim_memcmp(a: number, b: number, c: number): number;
+export function rust_zstd_wasm_shim_calloc(a: number, b: number): number;
+export function rust_zstd_wasm_shim_free(a: number): void;
+export function rust_zstd_wasm_shim_memcpy(a: number, b: number, c: number): number;
+export function rust_zstd_wasm_shim_memmove(a: number, b: number, c: number): number;
+export function rust_zstd_wasm_shim_memset(a: number, b: number, c: number): number;
+export function __wbindgen_malloc(a: number, b: number): number;
+export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
+export const __wbindgen_export_2: WebAssembly.Table;
+export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h926c1f64abec806a(a: number, b: number, c: number): void;
+export function __wbindgen_add_to_stack_pointer(a: number): number;
+export function __wbindgen_free(a: number, b: number, c: number): void;
+export function __wbindgen_exn_store(a: number): void;
+export function wasm_bindgen__convert__closures__invoke2_mut__h0bc31b695e8b86d8(a: number, b: number, c: number, d: number): void;
