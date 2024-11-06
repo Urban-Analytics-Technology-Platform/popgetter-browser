@@ -210,14 +210,14 @@
     removeSource();
 
     // TODO: update to use svelte component
-    $map.addSource("geojson-data", {
+    $map.addSource(sourceData, {
       type: "geojson",
       data: gj,
     });
     $map.addLayer({
-      id: "geojson-fill",
+      id: sourceFillLayer,
       type: "fill",
-      source: "geojson-data",
+      source: sourceData,
       paint: {
         "fill-color": [
           "interpolate",
