@@ -75,7 +75,6 @@ impl Backend {
         });
         let popgetter = Popgetter::new()
             .await
-            .map_err(|err| info!("{err}"))
             .unwrap();
         let expanded_metadata_df = popgetter
             .metadata
