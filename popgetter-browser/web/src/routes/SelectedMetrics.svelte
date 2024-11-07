@@ -34,6 +34,8 @@
     if (index > -1) {
       $selectedMetricsList.splice(index, 1);
     }
+    // Reactivity
+    $selectedMetricsList = [...$selectedMetricsList];
     return;
   }
 </script>

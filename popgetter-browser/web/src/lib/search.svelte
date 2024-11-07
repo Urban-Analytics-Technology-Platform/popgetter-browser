@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let searchTerm;
+  export let searchTerm;
 </script>
 
 <div id="search-input-cont">
@@ -15,7 +15,7 @@
 
 <style>
   #search-input-cont {
-    width: 40%;
+    width: 80%;
     display: flex;
     align-items: center;
     margin: 0 0 0 10px;

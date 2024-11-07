@@ -32,7 +32,7 @@
   import { onMount } from "svelte";
 
   let hidden8 = false;
-  let transitionParamsBottom = {
+  let transitionParams = {
     y: 320,
     duration: 200,
     easing: sineIn,
@@ -52,6 +52,8 @@
     $selectedMetricsList.indexOf(record) === -1
       ? $selectedMetricsList.push(record)
       : console.log("Not added");
+    // Reactivity
+    $selectedMetricsList = [...$selectedMetricsList];
     return;
   }
 
@@ -61,6 +63,8 @@
     if (index > -1) {
       $selectedMetricsList.splice(index, 1);
     }
+    // Reactivity
+    $selectedMetricsList = [...$selectedMetricsList];
     return;
   }
 
@@ -285,13 +289,20 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <div class="text-left">
-      <Button on:click={() => ($mode = { kind: "title" })}>Home</Button>
-      <Button on:click={() => (hidden8 = false)}>Preview</Button>
+    <div style="text-align: left; margin-top: 2.5%; margin-bottom: 5%; ">
+      <Button color="light" on:click={() => ($mode = { kind: "title" })}
+        >Home</Button
+      >
+      <Button color="light" on:click={() => (hidden8 = false)}
+        >Selected metrics and Preview</Button
+      >
     </div>
 
     <!-- Search -->
-    <section id="query-section">
+    <section
+      id="query-section"
+      style="text-align: left; margin-top: 2.5%; margin-bottom: 5%; "
+    >
       <Search bind:searchTerm on:input={debouncedHandleInput} />
     </section>
 
@@ -299,14 +310,14 @@
     <section id="<results-table">
       <Table>
         <TableHead>
-          <TableHeadCell>ID</TableHeadCell>
+          <!-- <TableHeadCell>ID</TableHeadCell> -->
           <TableHeadCell>Name</TableHeadCell>
           <TableHeadCell>Year</TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
           {#each items as item}
             <TableBodyRow>
-              <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell>
+              <!-- <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell> -->
               <TableBodyCell>{item.metric_human_readable_name}</TableBodyCell>
               <TableBodyCell
                 >{item.source_data_release_collection_period_start.slice(
@@ -330,12 +341,12 @@
   <div slot="map">
     <div class="overlay">
       <Drawer
-        placement="bottom"
-        width="w-full"
+        placement="top"
+        position="absolute"
         transitionType="fly"
+        width="w-full"
         activateClickOutside={false}
-        transitionParams={transitionParamsBottom}
-        divClass="overflow-y-auto z-50 p-4 bg-white bg-opacity-90 dark:bg-gray-800"
+        {transitionParams}
         backdrop={false}
         bind:hidden={hidden8}
         id="sidebar8"
@@ -369,18 +380,8 @@
 
 <style>
   .overlay {
-    /* vertical-align: bottom; */
-    position: absolute;
-    /* bottom: 100%; */
-    left: 0px;
-    /* left: 27%; */
-    width: 75%;
-    /* height: 20%; */
-    /* width: 10%; */
-    z-index: 500;
-    /* opacity: 100%; */
-
-    /* border-radius: 5px; */
-    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
+    width: 10px;
+    margin: 0 auto;
+    padding: 200px;
   }
 </style>

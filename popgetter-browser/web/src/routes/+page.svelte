@@ -93,8 +93,7 @@
       {:else if $mode.kind == "download"}
         <DownloadMode />
       {/if}
-
-      <!-- <DownloadMode /> -->
+      <!-- <DownloadMode></DownloadMode> -->
     </MapLibre>
   </div>
 </Layout>

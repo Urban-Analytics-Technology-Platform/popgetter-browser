@@ -85,7 +85,6 @@
       const metrics = await downloadMetrics(dataRequestSpec);
       $previewedMetricsList = metrics;
 
-      console.log("Test");
       console.log($previewedMetricsList.slice(0, 10));
       return;
     } catch (err) {
