@@ -313,12 +313,16 @@
           <!-- <TableHeadCell>ID</TableHeadCell> -->
           <TableHeadCell>Name</TableHeadCell>
           <TableHeadCell>Year</TableHeadCell>
+          <TableHeadCell>Selected metrics</TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
           {#each items as item}
             <TableBodyRow>
               <!-- <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell> -->
-              <TableBodyCell>{item.metric_human_readable_name}</TableBodyCell>
+              <TableBodyCell
+                class="max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2"
+                >{item.metric_human_readable_name}</TableBodyCell
+              >
               <TableBodyCell
                 >{item.source_data_release_collection_period_start.slice(
                   0,
@@ -326,8 +330,7 @@
                 )}</TableBodyCell
               >
               <TableBodyCell>
-                <Button on:click={() => add(item)}>Add</Button>
-                <Button on:click={() => remove(item)}>Remove</Button>
+                <Button color="light" on:click={() => add(item)}>Add</Button>
               </TableBodyCell>
             </TableBodyRow>
           {/each}

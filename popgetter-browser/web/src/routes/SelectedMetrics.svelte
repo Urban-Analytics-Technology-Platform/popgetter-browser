@@ -47,6 +47,7 @@
       <TableHeadCell>Name</TableHeadCell>
       <TableHeadCell>Column</TableHeadCell>
       <TableHeadCell>Year</TableHeadCell>
+      <TableHeadCell>Selected metrics</TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
       {#each $selectedMetricsList as item}
@@ -61,7 +62,7 @@
             )}</TableBodyCell
           >
           <TableBodyCell>
-            <Button on:click={() => remove(item)}>Remove</Button>
+            <Button color="light" on:click={() => remove(item)}>Remove</Button>
           </TableBodyCell>
         </TableBodyRow>
       {/each}
