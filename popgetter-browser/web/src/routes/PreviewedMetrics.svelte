@@ -19,23 +19,41 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  import { get } from "svelte/store";
+
+  import * as duckdb from "@duckdb/duckdb-wasm";
+  import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
+  import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
+  import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
+  import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
+
+  const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
+    mvp: {
+      mainModule: duckdb_wasm,
+      mainWorker: mvp_worker,
+    },
+    eh: {
+      mainModule: duckdb_wasm_eh,
+      mainWorker: eh_worker,
+    },
+  };
 
   function setPreviewMetricMap(item: Map<any, any>) {
     console.log("Set preview metric map: ", item);
     previewMetricMap.set(item);
   }
 
-  async function getMetrics(sqlString: string): Promise<any> {
-    if (sqlString.length > 0) {
-      let data = await fetch(`/api/download?metrics=${sqlString}`)
-        .then((r) => r.json())
-        .then((data) => {
-          console.log("Got result ", data);
-          return data;
-        });
-      return data;
-    }
+  async function getMetrics(sqlString: string): Promise<Array<Map<any, any>>> {
+    // Create a new connection
+    const conn = await db.connect();
+    // Query
+    const arrowResult = await conn.query(sqlString);
+    // Convert arrow table to json
+    const result = arrowResult.toArray().map((row) => row.toJSON());
+    console.log(result);
+    // Close the connection to release memory
+    await conn.close();
+
+    return result;
   }
 
   async function downloadMetrics(dataRequestSpec): Promise<any> {
@@ -48,21 +66,25 @@
       // Use only rust_backend to get metrics. Currently this has to
       // get the whole file so is inefficient as does not use range
       // request for the selected metrics only
-      let metrics: string = JSON.parse(
-        await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec),
-      );
+      // let metrics: string = JSON.parse(
+      //   await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec),
+      // );
 
       // If using the duckdb server for range requests, uncomment the below
       // but for a static site, this will not work
-      // let metricsSql: string =
-      //   await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
-      // const metrics = await getMetrics(metricsSql);
+      let metricsSql: string =
+        await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
+      console.log(metricsSql);
+      const metrics = await getMetrics(metricsSql);
       console.log(metrics);
       return metrics;
+      return [];
     } catch (err) {
       window.alert(`Failed to download: ${err}`);
     }
   }
+
+  let db;
 
   onMount(async () => {
     try {
@@ -70,6 +92,30 @@
       if (!loaded) {
         await $rustBackend!.initialise();
       }
+
+      // Select a bundle based on browser checks
+      const bundle = await duckdb.selectBundle(MANUAL_BUNDLES);
+      // Instantiate the asynchronus version of DuckDB-wasm
+      const worker = new Worker(bundle.mainWorker!);
+      const logger = new duckdb.ConsoleLogger();
+      db = new duckdb.AsyncDuckDB(logger, worker);
+      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+
+      // See WASM: https://duckdb.org/docs/api/wasm/instantiation#vite
+      // // Create a new connection
+      // const conn = await db.connect();
+      // // Query
+      // const arrowResult = await conn.query(
+      //   'SELECT "GEO_ID", "1", "2" FROM read_parquet(\'https://popgetter.blob.core.windows.net/releases/v0.2/gb_nir/metrics/DZ21DT0001.parquet\')',
+      // );
+      // // Convert arrow table to json
+      // const result = arrowResult.toArray().map((row) => row.toJSON());
+      // console.log("---");
+      // console.log(result);
+      // console.log("---");
+      // // Close the connection to release memory
+      // await conn.close();
+
       const metricsDownload = $selectedMetricsList.map((record) => ({
         MetricId: {
           id: record.metric_id,
@@ -98,7 +144,7 @@
     <TableHead>
       <TableHeadCell>GEO_ID</TableHeadCell>
       {#each $selectedMetricsList as item}
-        <Button on:click={() => setPreviewMetricMap(item)}
+        <Button color="light" on:click={() => setPreviewMetricMap(item)}
           ><TableHeadCell>{item.metric_parquet_column_name}</TableHeadCell
           ></Button
         >
@@ -108,7 +154,7 @@
       {#each $previewedMetricsList.slice(0, 20) as item}
         <TableBodyRow>
           {#each Object.keys(item).map(function (key) {
-            return item[key];
+            return String(item[key]);
           }) as el}
             <TableBodyCell>{el}</TableBodyCell>
           {/each}

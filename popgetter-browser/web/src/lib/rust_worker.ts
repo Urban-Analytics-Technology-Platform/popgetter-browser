@@ -79,6 +79,16 @@ export class RustBackend {
     // console.log("RustBackend.getCountries result", result);
     return result;
   }
+  async downloadDataRequestMetricsSql(
+    data_request_spec: Map<any, any>,
+  ): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result =
+      await this.inner!.downloadDataRequestMetricsSql(data_request_spec);
+    return result;
+  }
   async downloadDataRequestGeoms(
     data_request_spec: Map<any, any>,
   ): Promise<String> {

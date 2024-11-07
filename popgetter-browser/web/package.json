@@ -49,7 +49,9 @@
   },
   "dependencies": {
     "@cubejs-client/core": "^0.35.23",
+    "@duckdb/duckdb-wasm": "^1.29.0",
     "@uatp/components": "0.0.1",
+    "apache-arrow": "^18.0.0",
     "chart.js": "^4.4.3",
     "chartjs-plugin-zoom": "^2.0.1",
     "comlink": "^4.4.1",
