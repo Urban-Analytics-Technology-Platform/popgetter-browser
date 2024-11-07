@@ -26,6 +26,7 @@
     ChevronDownOutline,
   } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
+  import Subtitle from "./Subtitle.svelte";
 
   function setCountryAndLevelsList(country: String) {
     $selectedCountry = country;
@@ -53,6 +54,7 @@
 <SplitComponent>
   <div slot="sidebar">
     <div>
+      <Subtitle></Subtitle>
       <Button>
         <div>
           <h2

@@ -8,6 +8,7 @@
     ChevronDownOutline,
   } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
+  import Subtitle from "./Subtitle.svelte";
 
   const levels = {
     "United States": ["tract", "county", "block_group"],
@@ -46,6 +47,7 @@
 <SplitComponent>
   <div slot="sidebar">
     <div>
+      <Subtitle></Subtitle>
       <Button>
         <div>
           <h2
