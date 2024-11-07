@@ -198,6 +198,20 @@
     console.log(data);
   }
 
+  // Add debounce to input function so backend search only called after `delay`ms
+  function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+      // Clear previous timeout
+      clearTimeout(timeout);
+      // Set new timeout
+      timeout = setTimeout(() => {
+        func.apply(this, args);
+      }, delay);
+    };
+  }
+  const debouncedHandleInput = debounce(handleInput, 300);
+
   let min = 0;
   let max = 0;
 
@@ -266,7 +280,7 @@
 
     <!-- Search -->
     <section id="query-section">
-      <Search bind:searchTerm on:input={handleInput} />
+      <Search bind:searchTerm on:input={debouncedHandleInput} />
     </section>
 
     <!-- TODO: convert table for search results into component -->
