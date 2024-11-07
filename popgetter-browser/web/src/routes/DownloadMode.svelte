@@ -103,10 +103,13 @@
 
   const sourceData = "geojson-data";
   const sourceFillLayer = "geojson-layer";
-
+  const sourceLineLayer = "geojson-linelayer";
   function removeSource() {
     if ($map.getLayer(sourceFillLayer)) {
       $map.removeLayer(sourceFillLayer);
+    }
+    if ($map.getLayer(sourceLineLayer)) {
+      $map.removeLayer(sourceLineLayer);
     }
     if ($map.getSource(sourceData)) {
       $map.removeSource(sourceData);
@@ -268,6 +271,15 @@
         "fill-opacity": 0.5,
       },
     });
+    $map.addLayer({
+      id: sourceLineLayer,
+      type: "line",
+      source: sourceData,
+      paint: {
+        "line-color": "black",
+        "line-width": 0.5,
+      },
+    });
   }
 </script>
 
@@ -316,26 +328,6 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <!-- TODO: update to respond to change in max -->
-    <!-- <GeoJSON data={gj}>
-      <FillLayer
-        paint={{
-          "fill-color": [
-            "interpolate",
-            ["linear"],
-            // TODO: update to respond to selection
-            ["get", String($previewMetricMap.metric_parquet_column_name)],
-            0,
-            "#0a0",
-            max,
-            "#a00",
-          ],
-          "fill-opacity": 0.7,
-        }}
-      />
-      <LineLayer paint={{ "line-color": "black", "line-width": 0.5 }} />
-    </GeoJSON> -->
-
     <div class="overlay">
       <Drawer
         placement="bottom"
