@@ -42,6 +42,7 @@
     previewMetricMap.set(item);
   }
 
+  // Use duckdb-wasm to get metrics with range request
   async function getMetrics(sqlString: string): Promise<Array<Map<any, any>>> {
     // Create a new connection
     const conn = await db.connect();
@@ -63,19 +64,12 @@
     }
     try {
       console.log(dataRequestSpec);
-      // Use only rust_backend to get metrics. Currently this has to
-      // get the whole file so is inefficient as does not use range
-      // request for the selected metrics only
-      // let metrics: string = JSON.parse(
-      //   await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec),
-      // );
-
-      // If using the duckdb server for range requests, uncomment the below
-      // but for a static site, this will not work
       let metricsSql: string =
         await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
       console.log(metricsSql);
-      const metrics = await getMetrics(metricsSql);
+      const metrics = await getMetrics(
+        `INSTALL httpfs; LOAD httpfs; ${metricsSql}`,
+      );
       console.log(metrics);
       return metrics;
       return [];
@@ -93,6 +87,7 @@
         await $rustBackend!.initialise();
       }
 
+      // Set-up duckdb-wasm database: https://duckdb.org/docs/api/wasm/instantiation#vite
       // Select a bundle based on browser checks
       const bundle = await duckdb.selectBundle(MANUAL_BUNDLES);
       // Instantiate the asynchronus version of DuckDB-wasm
@@ -100,21 +95,6 @@
       const logger = new duckdb.ConsoleLogger();
       db = new duckdb.AsyncDuckDB(logger, worker);
       await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-
-      // See WASM: https://duckdb.org/docs/api/wasm/instantiation#vite
-      // // Create a new connection
-      // const conn = await db.connect();
-      // // Query
-      // const arrowResult = await conn.query(
-      //   'SELECT "GEO_ID", "1", "2" FROM read_parquet(\'https://popgetter.blob.core.windows.net/releases/v0.2/gb_nir/metrics/DZ21DT0001.parquet\')',
-      // );
-      // // Convert arrow table to json
-      // const result = arrowResult.toArray().map((row) => row.toJSON());
-      // console.log("---");
-      // console.log(result);
-      // console.log("---");
-      // // Close the connection to release memory
-      // await conn.close();
 
       const metricsDownload = $selectedMetricsList.map((record) => ({
         MetricId: {
