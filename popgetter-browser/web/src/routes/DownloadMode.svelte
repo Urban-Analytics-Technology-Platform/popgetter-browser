@@ -342,7 +342,7 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <div class="overlay">
+    <div>
       <Drawer
         placement="top"
         position="absolute"
@@ -381,10 +381,10 @@
   </div>
 </SplitComponent>
 
-<style>
+<!-- <style>
   .overlay {
-    width: 10px;
-    margin: 0 auto;
-    padding: 200px;
+    /* width: 10px; */
+    /* margin: 0 auto; */
+    /* padding: 200px; */
   }
-</style>
+</style> -->

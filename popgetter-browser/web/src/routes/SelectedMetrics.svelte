@@ -53,7 +53,10 @@
       {#each $selectedMetricsList as item}
         <TableBodyRow>
           <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell>
-          <TableBodyCell>{item.metric_human_readable_name}</TableBodyCell>
+          <TableBodyCell
+            class="max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2"
+            >{item.metric_human_readable_name}</TableBodyCell
+          >
           <TableBodyCell>{item.metric_parquet_column_name}</TableBodyCell>
           <TableBodyCell
             >{item.source_data_release_collection_period_start.slice(

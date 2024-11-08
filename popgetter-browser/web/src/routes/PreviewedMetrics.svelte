@@ -72,7 +72,6 @@
       );
       console.log(metrics);
       return metrics;
-      return [];
     } catch (err) {
       window.alert(`Failed to download: ${err}`);
     }
@@ -124,19 +123,23 @@
     <TableHead>
       <TableHeadCell>GEO_ID</TableHeadCell>
       {#each $selectedMetricsList as item}
-        <Button color="light" on:click={() => setPreviewMetricMap(item)}
-          ><TableHeadCell>{item.metric_parquet_column_name}</TableHeadCell
-          ></Button
+        <TableHeadCell
+          ><Button
+            size="xs"
+            color="light"
+            on:click={() => setPreviewMetricMap(item)}
+            >{item.metric_parquet_column_name}</Button
+          ></TableHeadCell
         >
       {/each}
     </TableHead>
-    <TableBody tableBodyClass="divide-y">
-      {#each $previewedMetricsList.slice(0, 20) as item}
+    <TableBody>
+      {#each $previewedMetricsList.slice(0, 10) as item}
         <TableBodyRow>
           {#each Object.keys(item).map(function (key) {
             return String(item[key]);
           }) as el}
-            <TableBodyCell>{el}</TableBodyCell>
+            <TableBodyCell class="justified">{el}</TableBodyCell>
           {/each}
         </TableBodyRow>
       {/each}
