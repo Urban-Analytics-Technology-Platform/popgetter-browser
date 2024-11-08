@@ -2,6 +2,7 @@
   import {
     previewedMetricsList,
     previewMetricMap,
+    previewMetricMapColors,
     rustBackend,
     rustIsLoaded,
     selectedCountry,
@@ -20,102 +21,36 @@
     TableHeadCell,
   } from "flowbite-svelte";
 
-  import * as duckdb from "@duckdb/duckdb-wasm";
-  import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
-  import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
-  import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
-  import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-
-  const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
-    mvp: {
-      mainModule: duckdb_wasm,
-      mainWorker: mvp_worker,
-    },
-    eh: {
-      mainModule: duckdb_wasm_eh,
-      mainWorker: eh_worker,
-    },
-  };
+  
+  import * as d3 from 'd3-scale';
+  import { interpolateViridis } from 'd3-scale-chromatic';
 
   function setPreviewMetricMap(item: Map<any, any>) {
     console.log("Set preview metric map: ", item);
     previewMetricMap.set(item);
-  }
-
-  // Use duckdb-wasm to get metrics with range request
-  async function getMetrics(sqlString: string): Promise<Array<Map<any, any>>> {
-    // Create a new connection
-    const conn = await db.connect();
-    // Query
-    const arrowResult = await conn.query(sqlString);
-    // Convert arrow table to json
-    const result = arrowResult.toArray().map((row) => row.toJSON());
-    console.log(result);
-    // Close the connection to release memory
-    await conn.close();
-
-    return result;
-  }
-
-  async function downloadMetrics(dataRequestSpec): Promise<any> {
-    const loaded = await $rustBackend!.isLoaded();
-    if (!loaded) {
-      await $rustBackend!.initialise();
-    }
-    try {
-      console.log(dataRequestSpec);
-      let metricsSql: string =
-        await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
-      console.log(metricsSql);
-      const metrics = await getMetrics(
-        `INSTALL httpfs; LOAD httpfs; ${metricsSql}`,
-      );
-      console.log(metrics);
-      return metrics;
-    } catch (err) {
-      window.alert(`Failed to download: ${err}`);
-    }
-  }
-
-  let db;
-
-  onMount(async () => {
-    try {
-      const loaded = await $rustBackend!.isLoaded();
-      if (!loaded) {
-        await $rustBackend!.initialise();
+    // console.log($previewMetricMap)
+    // console.log(Array.isArray($previewedMetricsList)); 
+    
+    // let columnName = "B25100_E001";
+    let columnName = $previewMetricMap.metric_parquet_column_name;
+    const min = Math.min(...$previewedMetricsList.map(record =>  Number(record[columnName])));
+    const max = Math.max(...$previewedMetricsList.map(record =>  Number(record[columnName])));
+    const colorScale = d3.scaleSequential(interpolateViridis).domain([min, max]);
+    // console.log(colorScale(100))
+    // console.log(columnName)
+    // console.log($previewedMetricsList[0])
+    $previewMetricMapColors = $previewedMetricsList.map(record => {
+      if ("color" in record) {
+        delete record["color"];
       }
-
-      // Set-up duckdb-wasm database: https://duckdb.org/docs/api/wasm/instantiation#vite
-      // Select a bundle based on browser checks
-      const bundle = await duckdb.selectBundle(MANUAL_BUNDLES);
-      // Instantiate the asynchronus version of DuckDB-wasm
-      const worker = new Worker(bundle.mainWorker!);
-      const logger = new duckdb.ConsoleLogger();
-      db = new duckdb.AsyncDuckDB(logger, worker);
-      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-
-      const metricsDownload = $selectedMetricsList.map((record) => ({
-        MetricId: {
-          id: record.metric_id,
-        },
-      }));
-      console.log(metricsDownload);
-      let dataRequestSpec = {
-        region: [],
-        metrics: metricsDownload,
-        years: [],
+      // console.log(record);
+      return {
+        ...record,
+        color: colorScale(Number(record[columnName]))
       };
-
-      const metrics = await downloadMetrics(dataRequestSpec);
-      $previewedMetricsList = metrics;
-
-      console.log($previewedMetricsList.slice(0, 10));
-      return;
-    } catch (err) {
-      window.alert(`Failed to get countries: ${err}`);
-    }
-  });
+    });
+    console.log($previewMetricMapColors);
+  }
 </script>
 
 <div>

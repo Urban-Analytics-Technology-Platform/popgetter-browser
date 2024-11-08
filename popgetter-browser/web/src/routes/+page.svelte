@@ -12,18 +12,23 @@
   import * as Comlink from "comlink";
 
   import {
-    map as mapStore,
+    // map as mapStore,
     rustBackend,
     mode,
     selectedCountry,
     selectedLevel,
+    countries
   } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
   import DownloadMode from "./DownloadMode.svelte";
   import LevelsMode from "./LevelsMode.svelte";
 
+  import { Spinner } from 'flowbite-svelte';
+
   // Everything in this script section is boilerplate; you can ignore it
+
+  let completedOnMount = false;
 
   // TODO Refactor this part if possible
   onMount(async () => {
@@ -43,16 +48,25 @@
     );
     let rustBackendWorker = await new MyRustWorker();
     rustBackend.set(rustBackendWorker);
+    
+    // Init countries
+    const loaded = await $rustBackend!.isLoaded();
+    if (!loaded) {
+      await $rustBackend!.initialise();
+    }
+    $countries = await $rustBackend!.getCountries();
+    console.log(countries);
+    completedOnMount = true;
   });
 
   // For debugging
   // selectedCountry.set("United States");
   // selectedLevel.set("tract");
 
-  let map: Map | undefined = undefined;
-  $: if (map) {
-    mapStore.set(map);
-  }
+  // let map: Map | undefined = undefined;
+  // $: if (map) {
+  //   mapStore.set(map);
+  // }
 
   let sidebarDiv: HTMLDivElement;
   let mapDiv: HTMLDivElement;
@@ -60,10 +74,10 @@
     sidebarDiv.innerHTML = "";
     sidebarDiv.appendChild($sidebarContents);
   }
-  $: if (mapDiv && $mapContents) {
-    mapDiv.innerHTML = "";
-    mapDiv.appendChild($mapContents);
-  }
+  // $: if (mapDiv && $mapContents) {
+  //   mapDiv.innerHTML = "";
+  //   mapDiv.appendChild($mapContents);
+  // }
 </script>
 
 <Layout>
@@ -76,24 +90,29 @@
     <div bind:this={sidebarDiv}></div>
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
-    <MapLibre
+    <!-- <MapLibre
       style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
       standardControls
       hash
       bind:map
-    >
-      <div bind:this={mapDiv}></div>
+    > -->
+      <!-- <div bind:this={mapDiv}></div> -->
 
       <!-- When you define new modes, you have to wire them up here -->
-
-      {#if $mode.kind == "title"}
-        <TitleMode />
-      {:else if $mode.kind == "level"}
-        <LevelsMode />
-      {:else if $mode.kind == "download"}
-        <DownloadMode />
+      
+      {#if completedOnMount}
+        {#if $mode.kind == "title"}
+          <TitleMode />
+        {:else if $mode.kind == "level"}
+          <LevelsMode />
+        {:else if $mode.kind == "download"}
+          <DownloadMode />
+        {/if}
+      {:else}
+        <Spinner></Spinner>
       {/if}
-      <!-- <DownloadMode></DownloadMode> -->
-    </MapLibre>
+
+    <!-- <DownloadMode></DownloadMode>  -->
+  <!-- </MapLibre> -->
   </div>
 </Layout>

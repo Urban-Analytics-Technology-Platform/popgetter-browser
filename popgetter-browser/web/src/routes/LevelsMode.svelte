@@ -28,17 +28,11 @@
 
   onMount(async () => {
     try {
-      const loaded = await $rustBackend!.isLoaded();
-      if (!loaded) {
-        await $rustBackend!.initialise();
-      }
-      // countries = await $rustBackend!.getCountries();
-      // console.log(countries);
       levelsList = levels[$selectedCountry + ""];
       console.log(levelsList);
       return;
     } catch (err) {
-      window.alert(`Failed to get countries: ${err}`);
+      window.alert(`Failed to get levels: ${err}`);
     }
   });
 </script>
@@ -72,4 +66,9 @@
       </Dropdown>
     </div>
   </div>
+  <!-- <div slot="map"> -->
+    <!-- <Map></Map> -->
+    <!-- <Map
+    ></Map> -->
+  <!-- </div> -->
 </SplitComponent>

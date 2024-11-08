@@ -1,7 +1,7 @@
 <script lang="ts">
   // import { SimpleComponent } from "@uatp/components";
   import { SplitComponent } from "@uatp/components/two_column_layout";
-  import { rustBackend, rustIsLoaded } from "./globals";
+  import { rustBackend, rustIsLoaded, tileUrl, countries, previewMetricMapColors } from "./globals";
   import { mode, selectedCountry, selectedLevel } from "./globals";
   import {
     Button,
@@ -27,26 +27,16 @@
   } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
   import Subtitle from "./Subtitle.svelte";
+  import Map from "./Map.svelte";
 
   function setCountryAndLevelsList(country: String) {
     $selectedCountry = country;
     console.log("Selected country: ", $selectedCountry);
     $mode = { kind: "level" };
   }
-  let countries: Array<Map<any, any>> = [];
+
   onMount(async () => {
-    try {
-      const loaded = await $rustBackend!.isLoaded();
-      if (!loaded) {
-        await $rustBackend!.initialise();
-      }
-      countries = await $rustBackend!.getCountries();
-      console.log(countries);
-      // levelsList = levels[selectedCountry];
-      return;
-    } catch (err) {
-      window.alert(`Failed to get countries: ${err}`);
-    }
+    $previewMetricMapColors = [];
   });
 </script>
 
@@ -71,7 +61,7 @@
       >
       <!-- TODO: save the selection to then be passed to search params -->
       <Dropdown placement="right-start">
-        {#each countries as country}
+        {#each $countries as country}
           <DropdownItem
             on:click={() =>
               setCountryAndLevelsList(country.country_name_short_en)}
@@ -87,5 +77,9 @@
       >
     </div> -->
   </div>
-  <div slot="map"></div>
+  <div slot="map">
+    <Map
+    
+    ></Map>
+  </div>
 </SplitComponent>

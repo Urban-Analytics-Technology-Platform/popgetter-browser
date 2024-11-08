@@ -5,6 +5,7 @@
     selectedCountry,
     selectedLevel,
     selectedMetricsList,
+    previewedMetricsList,
   } from "./globals";
   import { ChevronDownOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
@@ -36,6 +37,9 @@
     }
     // Reactivity
     $selectedMetricsList = [...$selectedMetricsList];
+    // TODO: update previewed metrics list
+    
+    // $previewedMetricsList = [...$previewedMetricsList];
     return;
   }
 </script>

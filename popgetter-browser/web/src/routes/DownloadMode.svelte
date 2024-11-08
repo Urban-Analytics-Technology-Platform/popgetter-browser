@@ -3,6 +3,7 @@
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import {
     map,
+    previewedMetricsList,
     previewMetricMap,
     rustBackend,
     selectedCountry,
@@ -30,6 +31,13 @@
   import SelectedMetrics from "./SelectedMetrics.svelte";
   import PreviewedMetrics from "./PreviewedMetrics.svelte";
   import { onMount } from "svelte";
+  import Map from "./Map.svelte";
+
+  import * as duckdb from "@duckdb/duckdb-wasm";
+  import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
+  import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
+  import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
+  import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
 
   let hidden8 = false;
   let transitionParams = {
@@ -38,15 +46,120 @@
     easing: sineIn,
   };
 
-  onMount(() => {
-    // Event listener to get bounding box on map load and on view change
-    $map.on("load", updateBoundingBox);
-    $map.on("moveend", updateBoundingBox);
-    updateBoundingBox();
-    let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
-    console.log("Bbox", bboxForRequest);
+  const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
+    mvp: {
+      mainModule: duckdb_wasm,
+      mainWorker: mvp_worker,
+    },
+    eh: {
+      mainModule: duckdb_wasm_eh,
+      mainWorker: eh_worker,
+    },
+  };
+
+  export let db;
+
+  // Event listener to get bounding box on map load and on view change
+  // $map.on("load", updateBoundingBox);
+  // $map.on("moveend", updateBoundingBox);
+  // updateBoundingBox();
+  // let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
+  // console.log("Bbox", bboxForRequest);
+
+  async function downloadMetrics(dataRequestSpec): Promise<any> {
+    const loaded = await $rustBackend!.isLoaded();
+    if (!loaded) {
+      await $rustBackend!.initialise();
+    }
+    try {
+      console.log(dataRequestSpec);
+      let metricsSql: string =
+        await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
+      console.log(metricsSql);
+      const metrics = await getMetrics(
+        `INSTALL httpfs; LOAD httpfs; ${metricsSql}`,
+      );
+      console.log(metrics);
+      return metrics;
+    } catch (err) {
+      window.alert(`Failed to download: ${err}`);
+    }
+  }
+
+  onMount(async () => {
+    try {
+      // Set-up duckdb-wasm database: https://duckdb.org/docs/api/wasm/instantiation#vite
+      // Select a bundle based on browser checks
+      const bundle = await duckdb.selectBundle(MANUAL_BUNDLES);
+      // Instantiate the asynchronus version of DuckDB-wasm
+      const worker = new Worker(bundle.mainWorker!);
+      const logger = new duckdb.ConsoleLogger();
+      db = new duckdb.AsyncDuckDB(logger, worker);
+      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+
+      
+      // countries = await $rustBackend!.getCountries();
+      // console.log(countries);
+      // return;
+
+      // const metricsDownload = $selectedMetricsList.map((record) => ({
+      //   MetricId: {
+      //     id: record.metric_id,
+      //   },
+      // }));
+      // console.log(metricsDownload);
+      // let dataRequestSpec = {
+      //   region: [],
+      //   metrics: metricsDownload,
+      //   years: [],
+      // };
+
+      // const metrics = await downloadMetrics(dataRequestSpec);
+      // $previewedMetricsList = metrics;
+
+      // console.log($previewedMetricsList.slice(0, 10));
+      // return;
+    } catch (err) {
+      console.log("Download");
+      window.alert(`${err}`);
+    }
   });
 
+  async function setPreviewedMetrics(): Promise<Array<Map<any, any>>> {
+    const metricsDownload = $selectedMetricsList.map((record) => ({
+      MetricId: {
+        id: record.metric_id,
+      },
+    }));
+    console.log(metricsDownload);
+    let dataRequestSpec = {
+      region: [],
+      metrics: metricsDownload,
+      years: [],
+    };
+    const metrics = await downloadMetrics(dataRequestSpec);
+    $previewedMetricsList = metrics;
+
+    console.log($previewedMetricsList.slice(0, 10));
+    return;
+  }
+
+  // Use duckdb-wasm to get metrics with range request
+  async function getMetrics(sqlString: string): Promise<Array<Map<any, any>>> {
+    // Create a new connection
+    const conn = await db.connect();
+    // Query
+    const arrowResult = await conn.query(sqlString);
+    // Convert arrow table to json
+    const result = arrowResult.toArray().map((row) => row.toJSON());
+    console.log(result);
+    // Close the connection to release memory
+    await conn.close();
+
+    return result;
+  }
+
+  // TODO: consider if can be async to enable preview to be generated here
   function add(record: Map<any, any>) {
     console.log(record);
     $selectedMetricsList.indexOf(record) === -1
@@ -57,6 +170,7 @@
     return;
   }
 
+  // TODO: consider if previewed metrics can be updated here too
   export function remove(record: Map<any, any>) {
     console.log(record);
     const index = $selectedMetricsList.indexOf(record);
@@ -81,18 +195,6 @@
     }
   }
 
-  async function getMetrics(sqlString: string): Promise<any> {
-    if (sqlString.length > 0) {
-      let data = await fetch(`/api/download?metrics=${sqlString}`)
-        .then((r) => r.json())
-        .then((data) => {
-          console.log("Got result ", data);
-          return data;
-        });
-      return data;
-    }
-  }
-
   // Using bbox
   let bbox = [];
   function updateBoundingBox() {
@@ -105,20 +207,6 @@
     ];
   }
 
-  const sourceData = "geojson-data";
-  const sourceFillLayer = "geojson-layer";
-  const sourceLineLayer = "geojson-linelayer";
-  function removeSource() {
-    if ($map.getLayer(sourceFillLayer)) {
-      $map.removeLayer(sourceFillLayer);
-    }
-    if ($map.getLayer(sourceLineLayer)) {
-      $map.removeLayer(sourceLineLayer);
-    }
-    if ($map.getSource(sourceData)) {
-      $map.removeSource(sourceData);
-    }
-  }
   // async function download(dataRequestSpec): Promise<Array<Map<any, any>>> {
   async function download(dataRequestSpec): Promise<any> {
     const loaded = await $rustBackend!.isLoaded();
@@ -127,12 +215,14 @@
     }
     try {
       // TODO: consider implementing client side join version of dowload
-      // let metricsSql: string =
-      //   await $rustBackend!.downloadDataRequestMetrics(dataRequestSpec);
+
+      let metricsSql: string =
+        await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
       // TODO: make the metrics and geoms run concurrently
-      // const metrics = await getMetrics(metricsSql);
+      const metrics = await getMetrics(metricsSql);
+
       // const geoms =
-      //   await $rustBackend!.downloadDataRequestGeoms(dataRequestSpec);
+      // await $rustBackend!.downloadDataRequestGeoms(dataRequestSpec);
 
       // TODO: add client side join here
       // https://svelte-maplibre.vercel.app/examples/data_join
@@ -235,55 +325,56 @@
   }
 
   async function handleClick() {
-    let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
-    console.log("Bbox", bboxForRequest);
-    let dataRequestSpec = {
-      region: [{ BoundingBox: bboxForRequest }],
-      metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
-    };
-    console.log(dataRequestSpec);
-    let gj_out = await download(dataRequestSpec);
-    setMinMax(gj_out);
-    gj = gj_out;
+    // let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
+    // console.log("Bbox", bboxForRequest);
+    // let dataRequestSpec = {
+    //   region: [{ BoundingBox: bboxForRequest }],
+    //   metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
+    // };
+    // console.log(dataRequestSpec);
+    // let gj_out = await download(dataRequestSpec);
+    // setMinMax(gj_out);
+    // gj = gj_out;
 
-    console.log($previewMetricMap.metric_parquet_column_name);
-    console.log(gj);
-    console.log(min);
-    console.log(max);
+    // console.log($previewMetricMap.metric_parquet_column_name);
+    // console.log(gj);
+    // console.log(min);
+    // console.log(max);
+    
 
-    removeSource();
+    // removeSource();
 
-    // TODO: update to use svelte component
-    $map.addSource(sourceData, {
-      type: "geojson",
-      data: gj,
-    });
-    $map.addLayer({
-      id: sourceFillLayer,
-      type: "fill",
-      source: sourceData,
-      paint: {
-        "fill-color": [
-          "interpolate",
-          ["linear"],
-          ["get", String($previewMetricMap.metric_parquet_column_name)],
-          0,
-          "#0a0",
-          max,
-          "#a00",
-        ],
-        "fill-opacity": 0.5,
-      },
-    });
-    $map.addLayer({
-      id: sourceLineLayer,
-      type: "line",
-      source: sourceData,
-      paint: {
-        "line-color": "black",
-        "line-width": 0.5,
-      },
-    });
+    // // TODO: update to use svelte component
+    // $map.addSource(sourceData, {
+    //   type: "geojson",
+    //   data: gj,
+    // });
+    // $map.addLayer({
+    //   id: sourceFillLayer,
+    //   type: "fill",
+    //   source: sourceData,
+    //   paint: {
+    //     "fill-color": [
+    //       "interpolate",
+    //       ["linear"],
+    //       ["get", String($previewMetricMap.metric_parquet_column_name)],
+    //       0,
+    //       "#0a0",
+    //       max,
+    //       "#a00",
+    //     ],
+    //     "fill-opacity": 0.5,
+    //   },
+    // });
+    // $map.addLayer({
+    //   id: sourceLineLayer,
+    //   type: "line",
+    //   source: sourceData,
+    //   paint: {
+    //     "line-color": "black",
+    //     "line-width": 0.5,
+    //   },
+    // });
   }
 </script>
 
@@ -342,6 +433,8 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
+    <Map></Map>
+
     <div>
       <Drawer
         placement="top"
@@ -365,7 +458,7 @@
             </p>
             <SelectedMetrics></SelectedMetrics>
           </TabItem>
-          <TabItem title="Preview">
+          <TabItem title="Preview" on:click={() => setPreviewedMetrics()}>
             <p class="text-sm text-gray-500 dark:text-gray-400">
               <b
                 >Preview of selected metrics <button
