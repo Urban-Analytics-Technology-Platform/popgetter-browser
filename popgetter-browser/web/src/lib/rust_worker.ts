@@ -101,6 +101,18 @@ export class RustBackend {
     // console.log("RustBackend.getCountries result", result);
     return result;
   }
+  async downloadDataRequestGeomsPmtiles(
+    data_request_spec: Map<any, any>,
+  ): Promise<String> {
+    if (!this.inner) {
+      throw new Error("RustBackend not initialised");
+    }
+    const result = await this.inner!.downloadDataRequestGeomsPmtiles(data_request_spec);
+    
+    // console.log("RustBackend.getCountries result", result);
+    return result;
+  }
+
   async downloadDataRequest(data_request_spec: Map<any, any>): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");

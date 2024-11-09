@@ -12,6 +12,7 @@ export function backend_downloadDataRequest(a: number, b: number): number;
 export function backend_downloadDataRequestMetrics(a: number, b: number): number;
 export function backend_downloadDataRequestMetricsSql(a: number, b: number): number;
 export function backend_downloadDataRequestGeoms(a: number, b: number): number;
+export function backend_downloadDataRequestGeomsPmtiles(a: number, b: number): number;
 export function backend_addColours(a: number, b: number, c: number): void;
 export function rust_zstd_wasm_shim_qsort(a: number, b: number, c: number, d: number): void;
 export function rust_zstd_wasm_shim_malloc(a: number): number;

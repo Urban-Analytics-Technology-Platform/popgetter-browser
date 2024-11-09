@@ -49,6 +49,11 @@ export class Backend {
    */
   downloadDataRequestGeoms(data_request_spec_js_value: any): Promise<string>;
   /**
+   * @param {any} data_request_spec_js_value
+   * @returns {Promise<string>}
+   */
+  downloadDataRequestGeomsPmtiles(data_request_spec_js_value: any): Promise<string>;
+  /**
    * Add a property called 'color' to each feature in the input GeoJSON. The value is a random
    * colour from Rust's mascot, Ferris.
    * @param {any} input
@@ -72,6 +77,7 @@ export interface InitOutput {
   readonly backend_downloadDataRequestMetrics: (a: number, b: number) => number;
   readonly backend_downloadDataRequestMetricsSql: (a: number, b: number) => number;
   readonly backend_downloadDataRequestGeoms: (a: number, b: number) => number;
+  readonly backend_downloadDataRequestGeomsPmtiles: (a: number, b: number) => number;
   readonly backend_addColours: (a: number, b: number, c: number) => void;
   readonly rust_zstd_wasm_shim_qsort: (a: number, b: number, c: number, d: number) => void;
   readonly rust_zstd_wasm_shim_malloc: (a: number) => number;

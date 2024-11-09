@@ -9,6 +9,7 @@
     selectedCountry,
     selectedLevel,
     selectedMetricsList,
+    tileUrl
   } from "./globals";
   import { mode } from "./globals";
   import Search from "../lib/search.svelte";
@@ -140,6 +141,19 @@
     const metrics = await downloadMetrics(dataRequestSpec);
     $previewedMetricsList = metrics;
 
+    // TODO: set geometry from dataRequestSpec
+    const loaded = await $rustBackend!.isLoaded();
+    if (!loaded) {
+      await $rustBackend!.initialise();
+    }
+    try {
+      let tileUrl: string =
+        await $rustBackend!.downloadDataRequestGeomsPmtiles(dataRequestSpec);
+      console.log(tileUrl);
+      $tileUrl = tileUrl;
+    } catch (err) {
+      window.alert(`Failed to get tile URL: ${err}`);
+    }
     console.log($previewedMetricsList.slice(0, 10));
     return;
   }

@@ -13,11 +13,12 @@ use serde_json::map::Map;
 use wasm_bindgen::prelude::*;
 
 use popgetter::{
+    config::Config,
     data_request_spec::DataRequestSpec,
     formatters::{GeoJSONFormatter, OutputGenerator},
     metadata::ExpandedMetadata,
     search::{Params, SearchParams, SearchResults},
-    Popgetter,
+    Popgetter, COL,
 };
 
 use self::timer::Timer;
@@ -73,9 +74,11 @@ impl Backend {
         START.call_once(|| {
             console_log::init_with_level(log::Level::Info).unwrap();
         });
-        let popgetter = Popgetter::new()
-            .await
-            .unwrap();
+        let popgetter = Popgetter::new_with_config(Config {
+            base_path: "https://popgetter.blob.core.windows.net/dev/v0.2/".into(),
+        })
+        .await
+        .unwrap();
         let expanded_metadata_df = popgetter
             .metadata
             .combined_metric_source_geometry()
@@ -197,6 +200,46 @@ impl Backend {
                 .try_into()
                 .unwrap();
         self.write_json(self.popgetter.download_geoms(&params).await.unwrap())
+    }
+
+    #[wasm_bindgen(js_name = downloadDataRequestGeomsPmtiles)]
+    pub async fn download_data_request_geoms_pmtiles(
+        &mut self,
+        data_request_spec_js_value: JsValue,
+    ) -> String {
+        // TODO: fix unwraps
+        let params: Params =
+            serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value)
+                .unwrap()
+                .try_into()
+                .unwrap();
+        let search_results = self.popgetter.search(&params.search);
+
+        let mut pmtile_urls = search_results
+            .0
+            .column(COL::GEOMETRY_FILEPATH_STEM)
+            .unwrap()
+            .unique()
+            .unwrap()
+            .str()
+            .unwrap()
+            .into_iter()
+            .map(|file_stem| {
+                format!(
+                    "pmtiles://{}{}.pmtiles",
+                    self.popgetter.config.base_path,
+                    file_stem.unwrap()
+                )
+            })
+            .collect::<Vec<_>>();
+        info!("{:#?}", pmtile_urls);
+        if pmtile_urls.len().ne(&1) {
+            panic!(
+                "{} geometries requested. Number of geometries must be 1.",
+                pmtile_urls.len()
+            );
+        }
+        pmtile_urls.pop().unwrap()
     }
 
     /// Add a property called 'color' to each feature in the input GeoJSON. The value is a random
