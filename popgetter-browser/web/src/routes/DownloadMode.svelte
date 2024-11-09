@@ -447,7 +447,7 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <Map></Map>
+    <Map ></Map>
 
     <div>
       <Drawer

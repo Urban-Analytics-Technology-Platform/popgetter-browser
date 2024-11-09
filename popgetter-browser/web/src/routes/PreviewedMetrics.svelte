@@ -8,6 +8,7 @@
     selectedCountry,
     selectedLevel,
     selectedMetricsList,
+    tileUrl
   } from "./globals";
   import { ChevronDownOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
@@ -50,6 +51,7 @@
       };
     });
     console.log($previewMetricMapColors);
+    console.log($tileUrl);
   }
 </script>
 
