@@ -75,7 +75,7 @@ impl Backend {
             console_log::init_with_level(log::Level::Info).unwrap();
         });
         let popgetter = Popgetter::new_with_config(Config {
-            base_path: "https://popgetter.blob.core.windows.net/dev/v0.2/".into(),
+            base_path: "https://popgetter.blob.core.windows.net/dev/v0.2".into(),
         })
         .await
         .unwrap();
@@ -226,7 +226,7 @@ impl Backend {
             .into_iter()
             .map(|file_stem| {
                 format!(
-                    "pmtiles://{}{}.pmtiles",
+                    "pmtiles://{}/{}.pmtiles",
                     self.popgetter.config.base_path,
                     file_stem.unwrap()
                 )
