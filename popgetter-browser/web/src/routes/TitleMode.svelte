@@ -12,7 +12,6 @@
   import { ChevronRightOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
   import Subtitle from "./Subtitle.svelte";
-
   import TilesMap from "./TilesMap.svelte";
 
   function setCountryAndLevelsList(country: String) {
@@ -20,7 +19,7 @@
     console.log("Selected country: ", $selectedCountry);
     $mode = { kind: "level" };
   }
-
+  let mapInstance;
   onMount(async () => {
     $previewMetricMapColors = [];
     $selectedMetricsList = [];
@@ -59,6 +58,6 @@
     </div>
   </div>
   <div slot="map">
-    <TilesMap></TilesMap>
+    <TilesMap bind:mapInstance></TilesMap>
   </div>
 </SplitComponent>

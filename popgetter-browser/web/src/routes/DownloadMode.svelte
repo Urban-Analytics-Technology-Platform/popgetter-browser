@@ -3,7 +3,6 @@
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import {
     duckdbBackend,
-    map,
     previewedMetricsList,
     previewMetricMap,
     rustBackend,
@@ -27,6 +26,11 @@
     CloseButton,
     TabItem,
     Tabs,
+    Label,
+    Input,
+    Dropdown,
+    DropdownItem,
+    ButtonGroup,
   } from "flowbite-svelte";
 
   import { sineIn } from "svelte/easing";
@@ -34,7 +38,11 @@
   import PreviewedMetrics from "./PreviewedMetrics.svelte";
   import { onMount } from "svelte";
   import TilesMap from "./TilesMap.svelte";
+  import { ChevronDownOutline } from "flowbite-svelte-icons";
 
+  const outputFormats: string[] = ["geojson", "csv", "geojsonseq"];
+  let selectedOutputFormat: string = "csv";
+  let bboxValue: string = "";
   let hidden8 = false;
   let transitionParams = {
     y: 320,
@@ -125,6 +133,16 @@
     return;
   }
 
+  function getPopgetterCli(): string {
+    let ids = $selectedMetricsList
+      .map((record: {}) => `--id ${record.metric_id}`)
+      .join(" ");
+    let outputFormatStr = "--output-format " + selectedOutputFormat;
+    let bboxStr = bboxValue === "" ? "" : "--bbox " + bboxValue;
+
+    return ["popgetter", "data", ids, outputFormatStr, bboxStr].join(" ");
+  }
+
   // TODO: consider if can be async to enable preview to be generated here
   function add(record: {}) {
     console.log(record);
@@ -161,16 +179,24 @@
     }
   }
 
-  // Using bbox
-  let bbox = [];
-  function updateBoundingBox() {
-    const bounds = $map.getBounds();
-    bbox = [
-      bounds.getWest(),
-      bounds.getSouth(),
-      bounds.getEast(),
-      bounds.getNorth(),
-    ];
+  // Assign bounding box from map
+  // TODO: fix this, currently returns not initialized
+  let mapInstance;
+  function updateBoundingBox(): string {
+    if (mapInstance) {
+      const bounds = mapInstance.getBounds().toArray();
+      console.log("Bounding Box:", bounds);
+      let bbox = [
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
+      ];
+      return bbox.map((el) => Number(el.toFixed(6)).toString()).join(",");
+    } else {
+      console.error("Map instance is not yet initialized.");
+      return "";
+    }
   }
 
   async function download(dataRequestSpec: {}): Promise<Array<{}>> {
@@ -356,7 +382,7 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <TilesMap></TilesMap>
+    <TilesMap bind:mapInstance></TilesMap>
 
     <div>
       <Drawer
@@ -390,6 +416,119 @@
               >
             </p>
             <PreviewedMetrics></PreviewedMetrics>
+          </TabItem>
+          <!-- TODO: complete adding interface for advanced search -->
+          <TabItem
+            title="Advanced Search"
+            on:click={() => setPreviewedMetrics()}
+          >
+            <!-- Search -->
+            <section
+              id="query-section"
+              style="text-align: left; margin-top: 2.5%; margin-bottom: 5%; "
+            >
+              <Search bind:searchTerm on:input={debouncedHandleInput} />
+            </section>
+
+            <!-- TODO: convert table for search results into component -->
+            <section id="<results-table">
+              <Table>
+                <TableHead>
+                  <!-- <TableHeadCell>ID</TableHeadCell> -->
+                  <TableHeadCell>Name</TableHeadCell>
+                  <TableHeadCell>Year</TableHeadCell>
+                  <TableHeadCell>Selected metrics</TableHeadCell>
+                </TableHead>
+                <TableBody tableBodyClass="divide-y">
+                  {#each items as item}
+                    <TableBodyRow>
+                      <!-- <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell> -->
+                      <TableBodyCell
+                        class="max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2"
+                        >{item.metric_human_readable_name}</TableBodyCell
+                      >
+                      <TableBodyCell
+                        >{item.source_data_release_collection_period_start.slice(
+                          0,
+                          4,
+                        )}</TableBodyCell
+                      >
+                      <TableBodyCell>
+                        <Button color="light" on:click={() => add(item)}
+                          >Add</Button
+                        >
+                      </TableBodyCell>
+                    </TableBodyRow>
+                  {/each}
+                </TableBody>
+              </Table>
+            </section>
+          </TabItem>
+          <TabItem title="Download" on:click={() => setPreviewedMetrics()}>
+            <div class="pt-8">
+              <div
+                style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
+              >
+                <Label class="space-y-2"
+                  ><span>Bounding Box (left, bottom, right, top)</span></Label
+                >
+                <ButtonGroup class="w-full">
+                  <Input
+                    id="bbox"
+                    type="text"
+                    placeholder=""
+                    bind:value={bboxValue}
+                  />
+                  <Button
+                    color="light"
+                    on:click={() => updateBoundingBox()}
+                    class="w-80">Get from map</Button
+                  >
+                </ButtonGroup>
+              </div>
+              <div
+                style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
+              >
+                <Label class="space-y-2">
+                  Output format:
+                  <Button color="light">
+                    {selectedOutputFormat}
+                    <ChevronDownOutline class="ms-2 h-6 w-6" />
+                  </Button>
+                  <Dropdown>
+                    {#each outputFormats as outputFormat}
+                      <DropdownItem
+                        on:click={() => (selectedOutputFormat = outputFormat)}
+                        >{outputFormat}
+                      </DropdownItem>
+                    {/each}
+                  </Dropdown>
+                </Label>
+              </div>
+            </div>
+            <div
+              style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
+            >
+              <Label class="space-y-2">
+                Popgetter CLI command
+                <ButtonGroup class="w-full">
+                  <Input
+                    id="popgetter-data-cli"
+                    readonly
+                    value={getPopgetterCli()}
+                  />
+                  <Button
+                    color="light"
+                    data-copy-to-clipboard-target="popgetter-data-cli"
+                    on:click={() => {
+                      console.log(getPopgetterCli());
+                      navigator.clipboard.writeText(getPopgetterCli());
+                    }}>Copy</Button
+                  >
+                </ButtonGroup>
+              </Label>
+            </div>
+            <!-- TODO: add download button -->
           </TabItem>
         </Tabs>
       </Drawer>

@@ -23,6 +23,8 @@
     $mode = { kind: "download" };
   }
 
+  let mapInstance;
+
   onMount(async () => {
     try {
       levelsList = levels[$selectedCountry + ""];
@@ -64,6 +66,6 @@
     </div>
   </div>
   <div slot="map">
-    <TilesMap></TilesMap>
+    <TilesMap bind:mapInstance></TilesMap>
   </div>
 </SplitComponent>
