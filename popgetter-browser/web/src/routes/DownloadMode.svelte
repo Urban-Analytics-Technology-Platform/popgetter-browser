@@ -93,7 +93,7 @@
     }
   });
 
-  async function setPreviewedMetrics(): Promise<Array<Map<any, any>>> {
+  async function setPreviewedMetrics(): Promise<Array<{}>> {
     const metricsDownload = $selectedMetricsList.map((record) => ({
       MetricId: {
         id: record.metric_id,
@@ -126,7 +126,7 @@
   }
 
   // TODO: consider if can be async to enable preview to be generated here
-  function add(record: Map<any, any>) {
+  function add(record: {}) {
     console.log(record);
     $selectedMetricsList.indexOf(record) === -1
       ? $selectedMetricsList.push(record)
@@ -137,7 +137,7 @@
   }
 
   // TODO: consider if previewed metrics can be updated here too
-  export function remove(record: Map<any, any>) {
+  export function remove(record: {}) {
     console.log(record);
     const index = $selectedMetricsList.indexOf(record);
     if (index > -1) {
@@ -148,7 +148,7 @@
     return;
   }
 
-  async function search(x, offset): Promise<Array<Map<any, any>>> {
+  async function search(x, offset): Promise<Array<{}>> {
     try {
       const loaded = await $rustBackend!.isLoaded();
       if (!loaded) {
@@ -173,8 +173,7 @@
     ];
   }
 
-  // async function download(dataRequestSpec): Promise<Array<Map<any, any>>> {
-  async function download(dataRequestSpec): Promise<any> {
+  async function download(dataRequestSpec: {}): Promise<Array<{}>> {
     const loaded = await $rustBackend!.isLoaded();
     if (!loaded) {
       await $rustBackend!.initialise();
@@ -198,8 +197,8 @@
   let searchParams = {};
 
   // For search results
-  let data: Array<Map<any, any>> = [];
-  let items: Array<Map<any, any>> = [];
+  let data: Array<{}> = [];
+  let items: Array<{}> = [];
 
   // For downloaded geojson
   let gj: FeatureCollection = {

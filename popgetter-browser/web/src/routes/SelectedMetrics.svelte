@@ -10,7 +10,7 @@
     TableHeadCell,
   } from "flowbite-svelte";
 
-  function remove(record: Map<any, any>) {
+  function remove(record: {}) {
     console.log(record);
     const index = $selectedMetricsList.indexOf(record);
     if (index > -1) {

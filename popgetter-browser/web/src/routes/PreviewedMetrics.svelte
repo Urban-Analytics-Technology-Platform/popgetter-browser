@@ -19,7 +19,7 @@
   import * as d3 from "d3-scale";
   import { interpolateViridis } from "d3-scale-chromatic";
 
-  function setPreviewMetricMap(item: Map<any, any>) {
+  function setPreviewMetricMap(item: {}) {
     console.log("Set preview metric map: ", item);
     previewMetricMap.set(item);
     // console.log($previewMetricMap)

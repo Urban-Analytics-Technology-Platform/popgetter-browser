@@ -43,7 +43,7 @@ export class RustBackend {
     return result;
   }
 
-  async search(search_params: Map<any, any>, offset: number): Promise<String> {
+  async search(search_params: {}, offset: number): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }
@@ -52,7 +52,7 @@ export class RustBackend {
     return result;
   }
 
-  async downloadMetrics(params: Map<any, any>): Promise<String> {
+  async downloadMetrics(params: {}): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }
@@ -60,7 +60,7 @@ export class RustBackend {
     // console.log("RustBackend.getCountries result", result);
     return result;
   }
-  async downloadGeoms(params: Map<any, any>): Promise<String> {
+  async downloadGeoms(params: {}): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }
@@ -69,7 +69,7 @@ export class RustBackend {
     return result;
   }
   async downloadDataRequestMetrics(
-    data_request_spec: Map<any, any>,
+    data_request_spec: {},
   ): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
@@ -80,7 +80,7 @@ export class RustBackend {
     return result;
   }
   async downloadDataRequestMetricsSql(
-    data_request_spec: Map<any, any>,
+    data_request_spec: {},
   ): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
@@ -90,7 +90,7 @@ export class RustBackend {
     return result;
   }
   async downloadDataRequestGeoms(
-    data_request_spec: Map<any, any>,
+    data_request_spec: {},
   ): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
@@ -102,7 +102,7 @@ export class RustBackend {
     return result;
   }
   async downloadDataRequestGeomsPmtiles(
-    data_request_spec: Map<any, any>,
+    data_request_spec: {},
   ): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
@@ -113,7 +113,7 @@ export class RustBackend {
     return result;
   }
 
-  async downloadDataRequest(data_request_spec: Map<any, any>): Promise<String> {
+  async downloadDataRequest(data_request_spec: {}): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }

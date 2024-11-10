@@ -25,15 +25,15 @@ export const rustIsLoaded = writable(false);
 export type Mode = { kind: "title" } | { kind: "level" } | { kind: "download" };
 
 export const mode: Writable<Mode> = writable({ kind: "title" });
-export const countries: Writable<Array<any>> = writable([]);
+export const countries: Writable<Array<{}>> = writable([]);
 export const selectedCountry: Writable<String> = writable("");
 export const selectedLevel: Writable<String> = writable("");
-export const selectedMetricsList: Writable<Array<Map<any, any>>> = writable([]);
-export const previewedMetricsList: Writable<Array<Map<any, any>>> = writable(
+export const selectedMetricsList: Writable<Array<{}>> = writable([]);
+export const previewedMetricsList: Writable<Array<{}>> = writable(
   [],
 );
 // Metric metadata to preview on map
-export const previewMetricMap: Writable<Map<any, any>> = writable({});
+export const previewMetricMap: Writable<{}> = writable({});
 // Colours for previewMetricMap
-export const previewMetricMapColors: Writable<Array<String>> = writable([]);
+export const previewMetricMapColors: Writable<Array<{}>> = writable([]);
 export const tileUrl = writable("pmtiles://https://popgetter.blob.core.windows.net/dev/v0.2/usa/geometries/tract_2019.pmtiles");
