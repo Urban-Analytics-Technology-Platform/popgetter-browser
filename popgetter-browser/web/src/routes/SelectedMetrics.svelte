@@ -1,33 +1,14 @@
 <script lang="ts">
-  import {
-    rustBackend,
-    rustIsLoaded,
-    selectedCountry,
-    selectedLevel,
-    selectedMetricsList,
-    previewedMetricsList,
-  } from "./globals";
-  import { ChevronDownOutline } from "flowbite-svelte-icons";
-  import { onMount } from "svelte";
+  import { selectedMetricsList, previewedMetricsList } from "./globals";
   import {
     Button,
-    Dropdown,
-    DropdownItem,
-    GradientButton,
-    Checkbox,
     Table,
     TableBody,
     TableBodyCell,
     TableBodyRow,
     TableHead,
     TableHeadCell,
-    Drawer,
-    CloseButton,
-    A,
-    TabItem,
-    Tabs,
   } from "flowbite-svelte";
-  import { get } from "svelte/store";
 
   function remove(record: Map<any, any>) {
     console.log(record);
@@ -38,7 +19,6 @@
     // Reactivity
     $selectedMetricsList = [...$selectedMetricsList];
     // TODO: update previewed metrics list
-    
     // $previewedMetricsList = [...$previewedMetricsList];
     return;
   }

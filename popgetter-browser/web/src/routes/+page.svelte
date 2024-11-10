@@ -4,27 +4,19 @@
     mapContents,
     sidebarContents,
   } from "@uatp/components/two_column_layout";
-  import { MapLibre } from "svelte-maplibre";
   import TitleMode from "./TitleMode.svelte";
 
   import { onMount } from "svelte";
   import type { Map } from "maplibre-gl";
   import * as Comlink from "comlink";
 
-  import {
-    // map as mapStore,
-    rustBackend,
-    mode,
-    selectedCountry,
-    selectedLevel,
-    countries
-  } from "./globals";
+  import { rustBackend, mode, countries } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
   import DownloadMode from "./DownloadMode.svelte";
   import LevelsMode from "./LevelsMode.svelte";
 
-  import { Spinner } from 'flowbite-svelte';
+  import { Spinner } from "flowbite-svelte";
 
   // Everything in this script section is boilerplate; you can ignore it
 
@@ -48,7 +40,7 @@
     );
     let rustBackendWorker = await new MyRustWorker();
     rustBackend.set(rustBackendWorker);
-    
+
     // Init countries
     const loaded = await $rustBackend!.isLoaded();
     if (!loaded) {
@@ -96,23 +88,20 @@
       hash
       bind:map
     > -->
-      <!-- <div bind:this={mapDiv}></div> -->
+    <!-- <div bind:this={mapDiv}></div> -->
 
-      <!-- When you define new modes, you have to wire them up here -->
-      
-      {#if completedOnMount}
-        {#if $mode.kind == "title"}
-          <TitleMode />
-        {:else if $mode.kind == "level"}
-          <LevelsMode />
-        {:else if $mode.kind == "download"}
-          <DownloadMode />
-        {/if}
-      {:else}
-        <Spinner></Spinner>
+    <!-- When you define new modes, you have to wire them up here -->
+    {#if completedOnMount}
+      {#if $mode.kind == "title"}
+        <TitleMode />
+      {:else if $mode.kind == "level"}
+        <LevelsMode />
+      {:else if $mode.kind == "download"}
+        <DownloadMode />
       {/if}
-
-    <!-- <DownloadMode></DownloadMode>  -->
-  <!-- </MapLibre> -->
+    {:else}
+      <Spinner></Spinner>
+    {/if}
+    <!-- </MapLibre> -->
   </div>
 </Layout>

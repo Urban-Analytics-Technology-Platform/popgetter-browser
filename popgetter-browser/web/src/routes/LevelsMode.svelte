@@ -1,12 +1,8 @@
 <script lang="ts">
   import { SplitComponent } from "@uatp/components/two_column_layout";
-  import { rustBackend, rustIsLoaded } from "./globals";
   import { mode, selectedCountry, selectedLevel } from "./globals";
   import { Button, Dropdown, DropdownItem } from "flowbite-svelte";
-  import {
-    ChevronRightOutline,
-    ChevronDownOutline,
-  } from "flowbite-svelte-icons";
+  import { ChevronRightOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
   import Subtitle from "./Subtitle.svelte";
 
@@ -66,9 +62,4 @@
       </Dropdown>
     </div>
   </div>
-  <!-- <div slot="map"> -->
-    <!-- <Map></Map> -->
-    <!-- <Map
-    ></Map> -->
-  <!-- </div> -->
 </SplitComponent>

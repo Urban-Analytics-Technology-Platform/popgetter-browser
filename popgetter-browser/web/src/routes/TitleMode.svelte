@@ -1,30 +1,15 @@
 <script lang="ts">
-  // import { SimpleComponent } from "@uatp/components";
   import { SplitComponent } from "@uatp/components/two_column_layout";
-  import { rustBackend, rustIsLoaded, tileUrl, countries, previewMetricMapColors } from "./globals";
+  import {
+    countries,
+    previewMetricMapColors,
+    previewedMetricsList,
+    selectedMetricsList,
+  } from "./globals";
   import { mode, selectedCountry, selectedLevel } from "./globals";
-  import {
-    Button,
-    Checkbox,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-    Drawer,
-    CloseButton,
-    A,
-    TabItem,
-    Tabs,
-    Dropdown,
-    DropdownItem,
-  } from "flowbite-svelte";
+  import { Button, Dropdown, DropdownItem } from "flowbite-svelte";
 
-  import {
-    ChevronRightOutline,
-    ChevronDownOutline,
-  } from "flowbite-svelte-icons";
+  import { ChevronRightOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
   import Subtitle from "./Subtitle.svelte";
   import Map from "./Map.svelte";
@@ -37,10 +22,11 @@
 
   onMount(async () => {
     $previewMetricMapColors = [];
+    $selectedMetricsList = [];
+    $previewedMetricsList = [];
   });
 </script>
 
-<!-- href="/search_and_download" -->
 <SplitComponent>
   <div slot="sidebar">
     <div>
@@ -70,16 +56,8 @@
         {/each}
       </Dropdown>
     </div>
-    <!-- <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600"></li> -->
-    <!-- <div>
-      <Button color="light" on:click={() => ($mode = { kind: "download" })}
-        >Search and Download<ChevronDoubleRightOutline /></Button
-      >
-    </div> -->
   </div>
   <div slot="map">
-    <Map
-    
-    ></Map>
+    <Map></Map>
   </div>
 </SplitComponent>

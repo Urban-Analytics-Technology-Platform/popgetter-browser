@@ -3,15 +3,9 @@
     previewedMetricsList,
     previewMetricMap,
     previewMetricMapColors,
-    rustBackend,
-    rustIsLoaded,
-    selectedCountry,
-    selectedLevel,
     selectedMetricsList,
-    tileUrl
+    tileUrl,
   } from "./globals";
-  import { ChevronDownOutline } from "flowbite-svelte-icons";
-  import { onMount } from "svelte";
   import {
     Button,
     Table,
@@ -22,35 +16,42 @@
     TableHeadCell,
   } from "flowbite-svelte";
 
-  
-  import * as d3 from 'd3-scale';
-  import { interpolateViridis } from 'd3-scale-chromatic';
+  import * as d3 from "d3-scale";
+  import { interpolateViridis } from "d3-scale-chromatic";
 
   function setPreviewMetricMap(item: Map<any, any>) {
     console.log("Set preview metric map: ", item);
     previewMetricMap.set(item);
     // console.log($previewMetricMap)
-    // console.log(Array.isArray($previewedMetricsList)); 
-    
+    // console.log(Array.isArray($previewedMetricsList));
+
     // let columnName = "B25100_E001";
     let columnName = $previewMetricMap.metric_parquet_column_name;
-    const min = Math.min(...$previewedMetricsList.map(record =>  Number(record[columnName])));
-    const max = Math.max(...$previewedMetricsList.map(record =>  Number(record[columnName])));
-    const colorScale = d3.scaleSequential(interpolateViridis).domain([min, max]);
+    const min = Math.min(
+      ...$previewedMetricsList.map((record) => Number(record[columnName])),
+    );
+    const max = Math.max(
+      ...$previewedMetricsList.map((record) => Number(record[columnName])),
+    );
+    const colorScale = d3
+      .scaleSequential(interpolateViridis)
+      .domain([min, max]);
     // console.log(colorScale(100))
     // console.log(columnName)
     // console.log($previewedMetricsList[0])
-    $previewMetricMapColors = $previewedMetricsList.map(record => {
+    console.log("min:", min);
+    console.log("max:", max);
+    $previewMetricMapColors = $previewedMetricsList.map((record) => {
       if ("color" in record) {
         delete record["color"];
       }
       // console.log(record);
       return {
         ...record,
-        color: colorScale(Number(record[columnName]))
+        color: colorScale(Number(record[columnName])),
       };
     });
-    console.log($previewMetricMapColors);
+    // console.log($previewMetricMapColors);
     console.log($tileUrl);
   }
 </script>

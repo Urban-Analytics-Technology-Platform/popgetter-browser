@@ -9,7 +9,7 @@
     selectedCountry,
     selectedLevel,
     selectedMetricsList,
-    tileUrl
+    tileUrl,
   } from "./globals";
   import { mode } from "./globals";
   import Search from "../lib/search.svelte";
@@ -58,7 +58,7 @@
     },
   };
 
-  export let db;
+  export let db = null;
 
   // Event listener to get bounding box on map load and on view change
   // $map.on("load", updateBoundingBox);
@@ -95,13 +95,10 @@
       // Instantiate the asynchronus version of DuckDB-wasm
       const worker = new Worker(bundle.mainWorker!);
       const logger = new duckdb.ConsoleLogger();
-      db = new duckdb.AsyncDuckDB(logger, worker);
-      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-
-      
-      // countries = await $rustBackend!.getCountries();
-      // console.log(countries);
-      // return;
+      if (db === null) {
+        db = new duckdb.AsyncDuckDB(logger, worker);
+        await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+      }
 
       // const metricsDownload = $selectedMetricsList.map((record) => ({
       //   MetricId: {
@@ -228,29 +225,6 @@
       await $rustBackend!.initialise();
     }
     try {
-      // TODO: consider implementing client side join version of dowload
-
-      let metricsSql: string =
-        await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
-      // TODO: make the metrics and geoms run concurrently
-      const metrics = await getMetrics(metricsSql);
-
-      // const geoms =
-      // await $rustBackend!.downloadDataRequestGeoms(dataRequestSpec);
-
-      // TODO: add client side join here
-      // https://svelte-maplibre.vercel.app/examples/data_join
-
-      // console.log(metrics);
-      // console.log(geoms);
-
-      // TODO: initial join impl on arrays
-      // const metricsAndGeoms = metrics.map((item1) => ({
-      //   ...metrics,
-      //   ...geoms.get(item1.GEO_ID),
-      // }));
-      // console.log(metricsAndGeoms);
-
       // Download directly with backend without range requests as not impl for wasm
       console.log(dataRequestSpec);
       let metricsAndGeoms =
@@ -323,21 +297,6 @@
   }
   const debouncedHandleInput = debounce(handleInput, 300);
 
-  let min = 0;
-  let max = 0;
-
-  // Function to load GeoJSON data and calculate min/max
-  function setMinMax(gj_out) {
-    const values = gj_out.features.map(
-      (feature) =>
-        feature.properties[
-          String($previewMetricMap.metric_parquet_column_name)
-        ],
-    );
-    min = Math.min(...values);
-    max = Math.max(...values);
-  }
-
   async function handleClick() {
     // let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
     // console.log("Bbox", bboxForRequest);
@@ -349,15 +308,11 @@
     // let gj_out = await download(dataRequestSpec);
     // setMinMax(gj_out);
     // gj = gj_out;
-
     // console.log($previewMetricMap.metric_parquet_column_name);
     // console.log(gj);
     // console.log(min);
     // console.log(max);
-    
-
     // removeSource();
-
     // // TODO: update to use svelte component
     // $map.addSource(sourceData, {
     //   type: "geojson",
@@ -447,7 +402,7 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <Map ></Map>
+    <Map></Map>
 
     <div>
       <Drawer
