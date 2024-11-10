@@ -33,7 +33,7 @@
   import SelectedMetrics from "./SelectedMetrics.svelte";
   import PreviewedMetrics from "./PreviewedMetrics.svelte";
   import { onMount } from "svelte";
-  import Map from "./Map.svelte";
+  import TilesMap from "./TilesMap.svelte";
 
   let hidden8 = false;
   let transitionParams = {
@@ -357,7 +357,7 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <Map></Map>
+    <TilesMap></TilesMap>
 
     <div>
       <Drawer

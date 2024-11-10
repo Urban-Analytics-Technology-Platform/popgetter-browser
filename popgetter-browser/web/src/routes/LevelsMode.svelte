@@ -5,6 +5,7 @@
   import { ChevronRightOutline } from "flowbite-svelte-icons";
   import { onMount } from "svelte";
   import Subtitle from "./Subtitle.svelte";
+  import TilesMap from "./TilesMap.svelte";
 
   const levels = {
     "United States": ["tract", "county", "block_group"],
@@ -61,5 +62,8 @@
         {/each}
       </Dropdown>
     </div>
+  </div>
+  <div slot="map">
+    <TilesMap></TilesMap>
   </div>
 </SplitComponent>
