@@ -30,7 +30,7 @@
       <FillLayer
         paint={{
           "fill-color": ["coalesce", ["feature-state", "color"], "#102020"],
-          "fill-opacity": 0.5,
+          "fill-opacity": 0.7,
         }}
         sourceLayer={"geoms"}
         manageHoverState

@@ -2,6 +2,7 @@
   import type { FeatureCollection } from "geojson";
   import { SplitComponent } from "@uatp/components/two_column_layout";
   import {
+    duckdbBackend,
     map,
     previewedMetricsList,
     previewMetricMap,
@@ -34,31 +35,12 @@
   import { onMount } from "svelte";
   import Map from "./Map.svelte";
 
-  import * as duckdb from "@duckdb/duckdb-wasm";
-  import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
-  import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
-  import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
-  import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-
   let hidden8 = false;
   let transitionParams = {
     y: 320,
     duration: 200,
     easing: sineIn,
   };
-
-  const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
-    mvp: {
-      mainModule: duckdb_wasm,
-      mainWorker: mvp_worker,
-    },
-    eh: {
-      mainModule: duckdb_wasm_eh,
-      mainWorker: eh_worker,
-    },
-  };
-
-  export let db = null;
 
   // Event listener to get bounding box on map load and on view change
   // $map.on("load", updateBoundingBox);
@@ -68,18 +50,19 @@
   // console.log("Bbox", bboxForRequest);
 
   async function downloadMetrics(dataRequestSpec): Promise<any> {
-    const loaded = await $rustBackend!.isLoaded();
-    if (!loaded) {
-      await $rustBackend!.initialise();
-    }
     try {
       console.log(dataRequestSpec);
+      if (!(await $rustBackend!.isLoaded())) {
+        await $rustBackend!.initialise();
+      }
       let metricsSql: string =
         await $rustBackend!.downloadDataRequestMetricsSql(dataRequestSpec);
       console.log(metricsSql);
-      const metrics = await getMetrics(
-        `INSTALL httpfs; LOAD httpfs; ${metricsSql}`,
-      );
+
+      if (!(await $duckdbBackend!.isLoaded())) {
+        await $duckdbBackend!.initialise();
+      }
+      const metrics = await $duckdbBackend!.getMetrics(metricsSql);
       console.log(metrics);
       return metrics;
     } catch (err) {
@@ -89,17 +72,6 @@
 
   onMount(async () => {
     try {
-      // Set-up duckdb-wasm database: https://duckdb.org/docs/api/wasm/instantiation#vite
-      // Select a bundle based on browser checks
-      const bundle = await duckdb.selectBundle(MANUAL_BUNDLES);
-      // Instantiate the asynchronus version of DuckDB-wasm
-      const worker = new Worker(bundle.mainWorker!);
-      const logger = new duckdb.ConsoleLogger();
-      if (db === null) {
-        db = new duckdb.AsyncDuckDB(logger, worker);
-        await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-      }
-
       // const metricsDownload = $selectedMetricsList.map((record) => ({
       //   MetricId: {
       //     id: record.metric_id,
@@ -111,10 +83,8 @@
       //   metrics: metricsDownload,
       //   years: [],
       // };
-
       // const metrics = await downloadMetrics(dataRequestSpec);
       // $previewedMetricsList = metrics;
-
       // console.log($previewedMetricsList.slice(0, 10));
       // return;
     } catch (err) {
@@ -153,21 +123,6 @@
     }
     console.log($previewedMetricsList.slice(0, 10));
     return;
-  }
-
-  // Use duckdb-wasm to get metrics with range request
-  async function getMetrics(sqlString: string): Promise<Array<Map<any, any>>> {
-    // Create a new connection
-    const conn = await db.connect();
-    // Query
-    const arrowResult = await conn.query(sqlString);
-    // Convert arrow table to json
-    const result = arrowResult.toArray().map((row) => row.toJSON());
-    console.log(result);
-    // Close the connection to release memory
-    await conn.close();
-
-    return result;
   }
 
   // TODO: consider if can be async to enable preview to be generated here

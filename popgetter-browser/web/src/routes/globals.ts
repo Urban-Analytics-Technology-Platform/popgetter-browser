@@ -4,6 +4,7 @@ import type { Map } from "maplibre-gl";
 import { writable, type Writable } from "svelte/store";
 import * as Comlink from "comlink";
 import { type RustBackend } from "$lib/rust_worker";
+import { type DuckDBBackend } from "$lib/duckdb_worker";
 
 // Using the MapLibre map directly isn't needed often; try to use
 // svelte-maplibre components inside the "map" slot
@@ -12,6 +13,9 @@ export const map: Writable<Map | null> = writable(null);
 // This is the way to call the backend
 export const rustBackend: Writable<Comlink.Remote<RustBackend> | null> =
   writable(null);
+
+export const duckdbBackend: Writable<Comlink.Remote<DuckDBBackend> | null> = writable(null);
+
 // Indicates the backend has a file loaded and is ready
 export const rustIsLoaded = writable(false);
 
@@ -33,4 +37,3 @@ export const previewMetricMap: Writable<Map<any, any>> = writable({});
 // Colours for previewMetricMap
 export const previewMetricMapColors: Writable<Array<String>> = writable([]);
 export const tileUrl = writable("pmtiles://https://popgetter.blob.core.windows.net/dev/v0.2/usa/geometries/tract_2019.pmtiles");
-

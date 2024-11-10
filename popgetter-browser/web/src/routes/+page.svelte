@@ -10,19 +10,17 @@
   import type { Map } from "maplibre-gl";
   import * as Comlink from "comlink";
 
-  import { rustBackend, mode, countries } from "./globals";
+  import { rustBackend, mode, countries, duckdbBackend } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
+  import { type DuckDBBackend } from "$lib/duckdb_worker";
+  import duckdbWorkerWrapper from "$lib/duckdb_worker?worker";
   import DownloadMode from "./DownloadMode.svelte";
   import LevelsMode from "./LevelsMode.svelte";
-
   import { Spinner } from "flowbite-svelte";
-
-  // Everything in this script section is boilerplate; you can ignore it
 
   let completedOnMount = false;
 
-  // TODO Refactor this part if possible
   onMount(async () => {
     // If you get "import declarations may only appear at top level of a
     // module", then you need a newer browser.
@@ -41,13 +39,22 @@
     let rustBackendWorker = await new MyRustWorker();
     rustBackend.set(rustBackendWorker);
 
+    // DuckDB
+    interface DuckDBWorkerConstructor {
+      new (): DuckDBBackend;
+    }
+    const MyDuckDBWorker: Comlink.Remote<DuckDBWorkerConstructor> =
+      Comlink.wrap(new duckdbWorkerWrapper());
+    let duckdbBackendWorker = await new MyDuckDBWorker();
+    duckdbBackend.set(duckdbBackendWorker);
+
     // Init countries
     const loaded = await $rustBackend!.isLoaded();
     if (!loaded) {
       await $rustBackend!.initialise();
     }
     $countries = await $rustBackend!.getCountries();
-    console.log(countries);
+    console.log($countries);
     completedOnMount = true;
   });
 
