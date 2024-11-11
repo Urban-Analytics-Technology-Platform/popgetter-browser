@@ -113,13 +113,11 @@ export class RustBackend {
     return result;
   }
 
-  async downloadDataRequest(data_request_spec: {}): Promise<String> {
+  async downloadDataRequest(data_request_spec: {}, outputFormat: string = "geojson"): Promise<String> {
     if (!this.inner) {
       throw new Error("RustBackend not initialised");
     }
-    const result = JSON.parse(
-      await this.inner!.downloadDataRequest(data_request_spec),
-    );
+    const result = await this.inner!.downloadDataRequest(data_request_spec, outputFormat);
     // console.log("RustBackend.getCountries result", result);
     return result;
   }

@@ -15,7 +15,9 @@ use wasm_bindgen::prelude::*;
 use popgetter::{
     config::Config,
     data_request_spec::DataRequestSpec,
-    formatters::{GeoJSONFormatter, OutputGenerator},
+    formatters::{
+        CSVFormatter, GeoJSONFormatter, GeoJSONSeqFormatter, OutputFormatter, OutputGenerator,
+    },
     metadata::ExpandedMetadata,
     search::{Params, SearchParams, SearchResults},
     Popgetter, COL,
@@ -141,7 +143,11 @@ impl Backend {
     }
 
     #[wasm_bindgen(js_name = downloadDataRequest)]
-    pub async fn download_data_request(&mut self, data_request_spec_js_value: JsValue) -> String {
+    pub async fn download_data_request(
+        &mut self,
+        data_request_spec_js_value: JsValue,
+        output_format: String,
+    ) -> String {
         let data_request_spec =
             serde_wasm_bindgen::from_value::<DataRequestSpec>(data_request_spec_js_value).unwrap();
 
@@ -150,7 +156,13 @@ impl Backend {
             .download_data_request_spec(&data_request_spec)
             .await
             .unwrap();
-        let output_formatter = GeoJSONFormatter;
+
+        let output_formatter = match output_format.to_lowercase() {
+            s if s == "geojson" => OutputFormatter::GeoJSON(GeoJSONFormatter),
+            s if s == "csv" => OutputFormatter::Csv(CSVFormatter::default()),
+            s if s == "geojsonseq" => OutputFormatter::GeoJSONSeq(GeoJSONSeqFormatter),
+            s => panic!("Output formatter ({s}) not supported. Choose one of: 'csv', 'geojson' or 'geojsonseq'")
+        };
         output_formatter.format(&mut geo_df).unwrap()
     }
 
@@ -333,7 +345,7 @@ mod tests {
             serde_json::from_str::<DataRequestSpec>(EXAMPLE_DATA_REQUEST_SPEC).unwrap();
         let data_request_spec_js_value = serde_wasm_bindgen::to_value(&data_request_spec).unwrap();
         let results = backend
-            .download_data_request(data_request_spec_js_value)
+            .download_data_request(data_request_spec_js_value, "geojson".to_string())
             .await;
         info!("{}", results);
     }

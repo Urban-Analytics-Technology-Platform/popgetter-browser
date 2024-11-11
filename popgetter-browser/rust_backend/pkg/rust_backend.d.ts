@@ -30,9 +30,10 @@ export class Backend {
   downloadGeoms(params_js_value: any): Promise<string>;
   /**
    * @param {any} data_request_spec_js_value
+   * @param {string} output_format
    * @returns {Promise<string>}
    */
-  downloadDataRequest(data_request_spec_js_value: any): Promise<string>;
+  downloadDataRequest(data_request_spec_js_value: any, output_format: string): Promise<string>;
   /**
    * @param {any} data_request_spec_js_value
    * @returns {Promise<string>}
@@ -73,7 +74,7 @@ export interface InitOutput {
   readonly backend_downloadMetrics: (a: number, b: number) => number;
   readonly backend_downloadMetricsSql: (a: number, b: number) => number;
   readonly backend_downloadGeoms: (a: number, b: number) => number;
-  readonly backend_downloadDataRequest: (a: number, b: number) => number;
+  readonly backend_downloadDataRequest: (a: number, b: number, c: number, d: number) => number;
   readonly backend_downloadDataRequestMetrics: (a: number, b: number) => number;
   readonly backend_downloadDataRequestMetricsSql: (a: number, b: number) => number;
   readonly backend_downloadDataRequestGeoms: (a: number, b: number) => number;

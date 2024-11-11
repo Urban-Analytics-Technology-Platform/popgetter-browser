@@ -8,7 +8,7 @@ export function backend_search(a: number, b: number, c: number): number;
 export function backend_downloadMetrics(a: number, b: number): number;
 export function backend_downloadMetricsSql(a: number, b: number): number;
 export function backend_downloadGeoms(a: number, b: number): number;
-export function backend_downloadDataRequest(a: number, b: number): number;
+export function backend_downloadDataRequest(a: number, b: number, c: number, d: number): number;
 export function backend_downloadDataRequestMetrics(a: number, b: number): number;
 export function backend_downloadDataRequestMetricsSql(a: number, b: number): number;
 export function backend_downloadDataRequestGeoms(a: number, b: number): number;

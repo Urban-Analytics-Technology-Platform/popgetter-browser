@@ -14,6 +14,7 @@
   import { mode } from "./globals";
   import Search from "../lib/search.svelte";
   import { GeoJSON, FillLayer, LineLayer } from "svelte-maplibre";
+  import { v4 as uuidv4 } from "uuid";
   import {
     Button,
     Table,
@@ -199,7 +200,7 @@
     }
   }
 
-  async function download(dataRequestSpec: {}): Promise<Array<{}>> {
+  async function download(dataRequestSpec: {}): Promise<String> {
     const loaded = await $rustBackend!.isLoaded();
     if (!loaded) {
       await $rustBackend!.initialise();
@@ -207,13 +208,27 @@
     try {
       // Download directly with backend without range requests as not impl for wasm
       console.log(dataRequestSpec);
-      let metricsAndGeoms =
-        await $rustBackend!.downloadDataRequest(dataRequestSpec);
+      let metricsAndGeoms = await $rustBackend!.downloadDataRequest(
+        dataRequestSpec,
+        selectedOutputFormat,
+      );
       console.log(metricsAndGeoms);
       return metricsAndGeoms;
     } catch (err) {
       window.alert(`Failed to download: ${err}`);
     }
+  }
+
+  function downloadAsFile(content: string) {
+    let filename = uuidv4() + "." + selectedOutputFormat.toLowerCase();
+    const blob = new Blob([content], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = URL.createObjectURL(blob);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   }
 
   // For search input
@@ -279,51 +294,27 @@
 
   async function handleClick() {
     // let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
-    // console.log("Bbox", bboxForRequest);
-    // let dataRequestSpec = {
-    //   region: [{ BoundingBox: bboxForRequest }],
-    //   metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
-    // };
-    // console.log(dataRequestSpec);
-    // let gj_out = await download(dataRequestSpec);
-    // setMinMax(gj_out);
-    // gj = gj_out;
-    // console.log($previewMetricMap.metric_parquet_column_name);
-    // console.log(gj);
-    // console.log(min);
-    // console.log(max);
-    // removeSource();
-    // // TODO: update to use svelte component
-    // $map.addSource(sourceData, {
-    //   type: "geojson",
-    //   data: gj,
-    // });
-    // $map.addLayer({
-    //   id: sourceFillLayer,
-    //   type: "fill",
-    //   source: sourceData,
-    //   paint: {
-    //     "fill-color": [
-    //       "interpolate",
-    //       ["linear"],
-    //       ["get", String($previewMetricMap.metric_parquet_column_name)],
-    //       0,
-    //       "#0a0",
-    //       max,
-    //       "#a00",
-    //     ],
-    //     "fill-opacity": 0.5,
-    //   },
-    // });
-    // $map.addLayer({
-    //   id: sourceLineLayer,
-    //   type: "line",
-    //   source: sourceData,
-    //   paint: {
-    //     "line-color": "black",
-    //     "line-width": 0.5,
-    //   },
-    // });
+    let bboxForRequest = bboxValue;
+    console.log("Bbox", bboxForRequest);
+
+    let dataRequestSpec = {
+      region: [
+        {
+          BoundingBox: bboxForRequest
+            .split(",")
+            .map((el) => Number(Number(el).toFixed(6))),
+        },
+      ],
+      // metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
+      metrics: $selectedMetricsList.map((metric) => ({
+        MetricId: {
+          id: metric.metric_id,
+        },
+      })),
+    };
+    console.log("DataRequestSpec");
+    console.log(dataRequestSpec);
+    downloadAsFile(await download(dataRequestSpec));
   }
 </script>
 
@@ -528,7 +519,16 @@
                 </ButtonGroup>
               </Label>
             </div>
-            <!-- TODO: add download button -->
+            <div
+              style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
+            >
+              <Button
+                color="light"
+                on:click={() => {
+                  handleClick();
+                }}>Download</Button
+              >
+            </div>
           </TabItem>
         </Tabs>
       </Drawer>
