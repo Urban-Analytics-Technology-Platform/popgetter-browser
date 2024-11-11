@@ -4,6 +4,7 @@
     VectorTileSource,
     FillLayer,
     JoinedData,
+    hoverStateFilter,
   } from "svelte-maplibre";
 
   import { tileUrl, previewMetricMapColors } from "./globals";
@@ -23,6 +24,8 @@
   function handleMapLoad(event) {
     mapInstance = event.detail.map;
   }
+
+  // TODO: upon click show record for GEO_ID from previewMetricMapColors
 </script>
 
 {#if showMap}
@@ -38,11 +41,14 @@
       <FillLayer
         paint={{
           "fill-color": ["coalesce", ["feature-state", "color"], "#102020"],
-          "fill-opacity": 0.7,
+          "fill-opacity": hoverStateFilter(0.7, 1.0),
         }}
         sourceLayer={"geoms"}
         manageHoverState
+        eventsIfTopMost
+        hoverCursor="pointer"
       />
+
       <JoinedData
         data={$previewMetricMapColors}
         idCol="GEO_ID"

@@ -297,6 +297,7 @@
     let bboxForRequest = bboxValue;
     console.log("Bbox", bboxForRequest);
 
+    // TODO: create data request spec when no bbox is given
     let dataRequestSpec = {
       region: [
         {
