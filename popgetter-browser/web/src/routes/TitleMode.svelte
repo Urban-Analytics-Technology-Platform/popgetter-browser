@@ -14,12 +14,14 @@
   import Subtitle from "./Subtitle.svelte";
   import TilesMap from "./TilesMap.svelte";
 
+  let bounds;
+
   function setCountryAndLevelsList(country: String) {
     $selectedCountry = country;
     console.log("Selected country: ", $selectedCountry);
     $mode = { kind: "level" };
   }
-  let mapInstance;
+
   onMount(async () => {
     $previewMetricMapColors = [];
     $selectedMetricsList = [];
@@ -58,6 +60,6 @@
     </div>
   </div>
   <div slot="map">
-    <TilesMap bind:mapInstance></TilesMap>
+    <TilesMap bind:bounds></TilesMap>
   </div>
 </SplitComponent>

@@ -15,6 +15,7 @@
     Belgium: ["statistical_sector", "municipality"],
   };
   let levelsList = [];
+  let bounds;
 
   function setLevel(level: String) {
     $selectedLevel = level;
@@ -22,8 +23,6 @@
     console.log("Selected level: ", $selectedLevel);
     $mode = { kind: "download" };
   }
-
-  let mapInstance;
 
   onMount(async () => {
     try {
@@ -66,6 +65,6 @@
     </div>
   </div>
   <div slot="map">
-    <TilesMap bind:mapInstance></TilesMap>
+    <TilesMap bind:bounds></TilesMap>
   </div>
 </SplitComponent>

@@ -13,7 +13,7 @@
   // Reactive subscription to get the updates to URL value
   let showMap = true;
   let currentUrl;
-  export let mapInstance;
+  export let bounds;
 
   // Subscribe to the store and toggle `showMap` to trigger a re-render
   tileUrl.subscribe((value) => {
@@ -21,10 +21,6 @@
     showMap = false;
     setTimeout(() => (showMap = true), 0);
   });
-
-  function handleMapLoad(event) {
-    mapInstance = event.detail.map;
-  }
 
   // TODO: upon click show record for GEO_ID from previewMetricMapColors
 </script>
@@ -35,8 +31,7 @@
     standardControls
     center={[0.0, 53.0]}
     zoom={2}
-    bind:this={mapInstance}
-    on:load={handleMapLoad}
+    bind:bounds
   >
     <VectorTileSource url={currentUrl} promoteId={"GEO_ID"}>
       <FillLayer

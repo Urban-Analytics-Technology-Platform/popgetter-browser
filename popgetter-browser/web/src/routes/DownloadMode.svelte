@@ -43,7 +43,10 @@
 
   const outputFormats: string[] = ["geojson", "csv", "geojsonseq"];
   let selectedOutputFormat: string = "csv";
-  let bboxValue: string = "";
+  let bounds:
+    | { _sw: { lat: number; lng: number }; _ne: { lat: number; lng: number } }
+    | undefined;
+  let bbox: string = "";
   let hidden8 = false;
   let transitionParams = {
     y: 320,
@@ -51,14 +54,7 @@
     easing: sineIn,
   };
 
-  // Event listener to get bounding box on map load and on view change
-  // $map.on("load", updateBoundingBox);
-  // $map.on("moveend", updateBoundingBox);
-  // updateBoundingBox();
-  // let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
-  // console.log("Bbox", bboxForRequest);
-
-  async function downloadMetrics(dataRequestSpec): Promise<any> {
+  async function downloadMetrics(dataRequestSpec: {}): Promise<any> {
     try {
       console.log(dataRequestSpec);
       if (!(await $rustBackend!.isLoaded())) {
@@ -79,30 +75,8 @@
     }
   }
 
-  onMount(async () => {
-    try {
-      // const metricsDownload = $selectedMetricsList.map((record) => ({
-      //   MetricId: {
-      //     id: record.metric_id,
-      //   },
-      // }));
-      // console.log(metricsDownload);
-      // let dataRequestSpec = {
-      //   region: [],
-      //   metrics: metricsDownload,
-      //   years: [],
-      // };
-      // const metrics = await downloadMetrics(dataRequestSpec);
-      // $previewedMetricsList = metrics;
-      // console.log($previewedMetricsList.slice(0, 10));
-      // return;
-    } catch (err) {
-      console.log("Download");
-      window.alert(`${err}`);
-    }
-  });
-
   async function setPreviewedMetrics(): Promise<Array<{}>> {
+    // Get metrics
     const metricsDownload = $selectedMetricsList.map((record) => ({
       MetricId: {
         id: record.metric_id,
@@ -117,7 +91,7 @@
     const metrics = await downloadMetrics(dataRequestSpec);
     $previewedMetricsList = metrics;
 
-    // TODO: set geometry from dataRequestSpec
+    // Get and set PMTiles URL from data request spec
     const loaded = await $rustBackend!.isLoaded();
     if (!loaded) {
       await $rustBackend!.initialise();
@@ -139,7 +113,7 @@
       .map((record: {}) => `--id ${record.metric_id}`)
       .join(" ");
     let outputFormatStr = "--output-format " + selectedOutputFormat;
-    let bboxStr = bboxValue === "" ? "" : "--bbox " + bboxValue;
+    let bboxStr = bbox === "" ? "" : "--bbox " + bbox;
 
     return ["popgetter", "data", ids, outputFormatStr, bboxStr].join(" ");
   }
@@ -180,24 +154,12 @@
     }
   }
 
-  // Assign bounding box from map
-  // TODO: fix this, currently returns not initialized
-  let mapInstance;
-  function updateBoundingBox(): string {
-    if (mapInstance) {
-      const bounds = mapInstance.getBounds().toArray();
-      console.log("Bounding Box:", bounds);
-      let bbox = [
-        bounds.getWest(),
-        bounds.getSouth(),
-        bounds.getEast(),
-        bounds.getNorth(),
-      ];
-      return bbox.map((el) => Number(el.toFixed(6)).toString()).join(",");
-    } else {
-      console.error("Map instance is not yet initialized.");
-      return "";
-    }
+  // Assign bounding box from bounds
+  function updateBoundingBox() {
+    console.log("Bounds:", bounds);
+    bbox = [bounds._sw.lng, bounds._sw.lat, bounds._ne.lng, bounds._ne.lat]
+      .map((el) => Number(el.toFixed(6)).toString())
+      .join(",");
   }
 
   async function download(dataRequestSpec: {}): Promise<String> {
@@ -292,21 +254,19 @@
   }
   const debouncedHandleInput = debounce(handleInput, 300);
 
-  async function handleClick() {
-    // let bboxForRequest = bbox.map((el) => Number(el.toFixed(6)));
-    let bboxForRequest = bboxValue;
-    console.log("Bbox", bboxForRequest);
-
-    // TODO: create data request spec when no bbox is given
+  async function downloadAndSave() {
+    console.log("Bbox", bbox);
     let dataRequestSpec = {
-      region: [
-        {
-          BoundingBox: bboxForRequest
-            .split(",")
-            .map((el) => Number(Number(el).toFixed(6))),
-        },
-      ],
-      // metrics: [{ MetricId: { id: $previewMetricMap.metric_id } }],
+      region:
+        bbox === ""
+          ? []
+          : [
+              {
+                BoundingBox: bbox
+                  .split(",")
+                  .map((el) => Number(Number(el).toFixed(6))),
+              },
+            ],
       metrics: $selectedMetricsList.map((metric) => ({
         MetricId: {
           id: metric.metric_id,
@@ -374,7 +334,7 @@
   <!-- Map previews downloaded metrics -->
 
   <div slot="map">
-    <TilesMap bind:mapInstance></TilesMap>
+    <TilesMap bind:bounds></TilesMap>
 
     <div>
       <Drawer
@@ -403,7 +363,8 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">
               <b
                 >Preview of selected metrics <button
-                  on:click={() => handleClick()}>(view selected on map)</button
+                  on:click={() => downloadAndSave()}
+                  >(view selected on map)</button
                 ></b
               >
             </p>
@@ -456,7 +417,13 @@
               </Table>
             </section>
           </TabItem>
-          <TabItem title="Download" on:click={() => setPreviewedMetrics()}>
+          <TabItem
+            title="Download"
+            on:click={() => {
+              updateBoundingBox();
+              setPreviewedMetrics();
+            }}
+          >
             <div class="pt-8">
               <div
                 style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
@@ -469,7 +436,7 @@
                     id="bbox"
                     type="text"
                     placeholder=""
-                    bind:value={bboxValue}
+                    bind:value={bbox}
                   />
                   <Button
                     color="light"
@@ -526,7 +493,7 @@
               <Button
                 color="light"
                 on:click={() => {
-                  handleClick();
+                  downloadAndSave();
                 }}>Download</Button
               >
             </div>
