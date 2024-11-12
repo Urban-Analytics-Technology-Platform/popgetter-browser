@@ -203,12 +203,6 @@
   let data: Array<{}> = [];
   let items: Array<{}> = [];
 
-  // For downloaded geojson
-  let gj: FeatureCollection = {
-    type: "FeatureCollection",
-    features: [],
-  };
-
   // Function to handle button click
   async function handleInput() {
     // Assign the result of `generateResult` to the `result` variable
@@ -277,11 +271,18 @@
     console.log(dataRequestSpec);
     downloadAsFile(await download(dataRequestSpec));
   }
+
+  // Classes and styles
+  const nameAndDescriptionClass =
+    "max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2";
+  const divStyle = "text-align: left; margin-top: 2.5%; margin-bottom: 5%; ";
+  const downloadDivStyle =
+    "text-align: left; margin-top: 1.0%; margin-bottom: 1.0%; ";
 </script>
 
 <SplitComponent>
   <div slot="sidebar">
-    <div style="text-align: left; margin-top: 2.5%; margin-bottom: 5%; ">
+    <div style={divStyle}>
       <Button color="light" on:click={() => ($mode = { kind: "title" })}
         >Home</Button
       >
@@ -291,18 +292,14 @@
     </div>
 
     <!-- Search -->
-    <section
-      id="query-section"
-      style="text-align: left; margin-top: 2.5%; margin-bottom: 5%; "
-    >
+    <section id="query-section" style={divStyle}>
       <Search bind:searchTerm on:input={debouncedHandleInput} />
     </section>
 
     <!-- TODO: convert table for search results into component -->
-    <section id="<results-table">
+    <section id="results-table">
       <Table>
         <TableHead>
-          <!-- <TableHeadCell>ID</TableHeadCell> -->
           <TableHeadCell>Name</TableHeadCell>
           <TableHeadCell>Year</TableHeadCell>
           <TableHeadCell>Selected metrics</TableHeadCell>
@@ -310,9 +307,7 @@
         <TableBody tableBodyClass="divide-y">
           {#each items as item}
             <TableBodyRow>
-              <!-- <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell> -->
-              <TableBodyCell
-                class="max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2"
+              <TableBodyCell class={nameAndDescriptionClass}
                 >{item.metric_human_readable_name}</TableBodyCell
               >
               <TableBodyCell
@@ -376,29 +371,28 @@
             on:click={() => setPreviewedMetrics()}
           >
             <!-- Search -->
-            <section
-              id="query-section"
-              style="text-align: left; margin-top: 2.5%; margin-bottom: 5%; "
-            >
+            <section id="query-section" style={divStyle}>
               <Search bind:searchTerm on:input={debouncedHandleInput} />
             </section>
 
             <!-- TODO: convert table for search results into component -->
-            <section id="<results-table">
+            <section id="results-table">
               <Table>
                 <TableHead>
                   <!-- <TableHeadCell>ID</TableHeadCell> -->
                   <TableHeadCell>Name</TableHeadCell>
+                  <TableHeadCell>Description</TableHeadCell>
                   <TableHeadCell>Year</TableHeadCell>
                   <TableHeadCell>Selected metrics</TableHeadCell>
                 </TableHead>
                 <TableBody tableBodyClass="divide-y">
                   {#each items as item}
                     <TableBodyRow>
-                      <!-- <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell> -->
-                      <TableBodyCell
-                        class="max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2"
+                      <TableBodyCell class={nameAndDescriptionClass}
                         >{item.metric_human_readable_name}</TableBodyCell
+                      >
+                      <TableBodyCell class={nameAndDescriptionClass}
+                        >{item.metric_description}</TableBodyCell
                       >
                       <TableBodyCell
                         >{item.source_data_release_collection_period_start.slice(
@@ -425,9 +419,7 @@
             }}
           >
             <div class="pt-8">
-              <div
-                style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
-              >
+              <div style={downloadDivStyle}>
                 <Label class="space-y-2"
                   ><span>Bounding Box (left, bottom, right, top)</span></Label
                 >
@@ -445,9 +437,7 @@
                   >
                 </ButtonGroup>
               </div>
-              <div
-                style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
-              >
+              <div style={downloadDivStyle}>
                 <Label class="space-y-2">
                   Output format:
                   <Button color="light">
@@ -465,9 +455,7 @@
                 </Label>
               </div>
             </div>
-            <div
-              style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
-            >
+            <div style={downloadDivStyle}>
               <Label class="space-y-2">
                 Popgetter CLI command
                 <ButtonGroup class="w-full">
@@ -487,9 +475,7 @@
                 </ButtonGroup>
               </Label>
             </div>
-            <div
-              style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
-            >
+            <div style={downloadDivStyle}>
               <Label class="space-y-2">
                 Download and save data
                 <ButtonGroup class="w-full">

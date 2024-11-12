@@ -22,13 +22,17 @@
     // $previewedMetricsList = [...$previewedMetricsList];
     return;
   }
+
+  export let nameAndDescriptionClass =
+    "max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2";
 </script>
 
 <div>
   <Table>
     <TableHead>
       <TableHeadCell>ID</TableHeadCell>
-      <TableHeadCell>Name</TableHeadCell>
+      <TableHeadCell class={nameAndDescriptionClass}>Name</TableHeadCell>
+      <TableHeadCell class={nameAndDescriptionClass}>Description</TableHeadCell>
       <TableHeadCell>Column</TableHeadCell>
       <TableHeadCell>Year</TableHeadCell>
       <TableHeadCell>Selected metrics</TableHeadCell>
@@ -37,9 +41,11 @@
       {#each $selectedMetricsList as item}
         <TableBodyRow>
           <TableBodyCell>{item.metric_id.slice(0, 8)}</TableBodyCell>
-          <TableBodyCell
-            class="max-w-md whitespace-normal break-words border-b border-gray-200 px-2 py-2"
+          <TableBodyCell class={nameAndDescriptionClass}
             >{item.metric_human_readable_name}</TableBodyCell
+          >
+          <TableBodyCell class={nameAndDescriptionClass}
+            >{item.metric_description}</TableBodyCell
           >
           <TableBodyCell>{item.metric_parquet_column_name}</TableBodyCell>
           <TableBodyCell
