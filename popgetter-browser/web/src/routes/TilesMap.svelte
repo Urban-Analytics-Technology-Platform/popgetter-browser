@@ -5,9 +5,10 @@
     FillLayer,
     JoinedData,
     hoverStateFilter,
+    Popup,
   } from "svelte-maplibre";
 
-  import { tileUrl, previewMetricMapColors } from "./globals";
+  import { tileUrl, previewMetricMapColors, previewMetricMap } from "./globals";
 
   // Reactive subscription to get the updates to URL value
   let showMap = true;
@@ -47,8 +48,25 @@
         manageHoverState
         eventsIfTopMost
         hoverCursor="pointer"
-      />
-
+      >
+        <!-- TODO: WIP add hover   -->
+        <!-- <FillLayer
+        paint={{
+          "fill-color": ["coalesce", ["feature-state", "color"], "#102020"],
+          "fill-opacity": 0.7,
+        }}
+        sourceLayer={"geoms"}
+        manageHoverState
+      >
+        <Popup openOn="hover" let:features>
+          <div class="flex flex-col gap-2">
+            <p>
+              {JSON.stringify($previewMetricMap["metric_human_readable_name"])}:
+              {JSON.stringify(features && Number(features[0].state), null, 2)}
+            </p>
+          </div>
+        </Popup> -->
+      </FillLayer>
       <JoinedData
         data={$previewMetricMapColors}
         idCol="GEO_ID"
