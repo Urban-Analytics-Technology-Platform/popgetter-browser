@@ -490,12 +490,17 @@
             <div
               style="text-align: left; margin-top: 0.5%; margin-bottom: 0.5%; "
             >
-              <Button
-                color="light"
-                on:click={() => {
-                  downloadAndSave();
-                }}>Download</Button
-              >
+              <Label class="space-y-2">
+                Download and save data
+                <ButtonGroup class="w-full">
+                  <Button
+                    color="light"
+                    on:click={() => {
+                      downloadAndSave();
+                    }}>Download and save</Button
+                  >
+                </ButtonGroup>
+              </Label>
             </div>
           </TabItem>
         </Tabs>
