@@ -25,6 +25,7 @@
     TableHeadCell,
     Drawer,
     CloseButton,
+    NumberInput,
     TabItem,
     Tabs,
     Label,
@@ -40,6 +41,7 @@
   import { onMount } from "svelte";
   import TilesMap from "./TilesMap.svelte";
   import { ChevronDownOutline } from "flowbite-svelte-icons";
+  import { writable } from "svelte/store";
 
   const outputFormats: string[] = ["geojson", "csv", "geojsonseq"];
   let selectedOutputFormat: string = "csv";
@@ -76,6 +78,10 @@
   }
 
   async function setPreviewedMetrics(): Promise<Array<{}>> {
+    // Return if no selected metrics
+    if ($selectedMetricsList.length === 0) {
+      return [];
+    }
     // Get metrics
     const metricsDownload = $selectedMetricsList.map((record) => ({
       MetricId: {
@@ -203,6 +209,8 @@
   let data: Array<{}> = [];
   let items: Array<{}> = [];
 
+  const page = writable<number>(0);
+
   // Function to handle button click
   async function handleInput() {
     // Assign the result of `generateResult` to the `result` variable
@@ -228,8 +236,9 @@
       region_spec: [],
     };
     console.log(searchParams);
+    console.log($page);
     // TODO: update once pagination implemnted
-    data = await search(searchParams, 0);
+    data = await search(searchParams, $page);
     items = data.slice(0, 10);
     console.log(data);
   }
@@ -293,7 +302,15 @@
 
     <!-- Search -->
     <section id="query-section" style={divStyle}>
-      <Search bind:searchTerm on:input={debouncedHandleInput} />
+      <Label class="space-y-2">
+        Search term
+        <Search bind:searchTerm on:input={debouncedHandleInput} />
+      </Label>
+
+      <Label class="space-y-2">
+        Page
+        <NumberInput bind:value={$page} on:input={debouncedHandleInput} />
+      </Label>
     </section>
 
     <!-- TODO: convert table for search results into component -->
@@ -366,13 +383,21 @@
             <PreviewedMetrics></PreviewedMetrics>
           </TabItem>
           <!-- TODO: complete adding interface for advanced search -->
-          <TabItem
-            title="Advanced Search"
-            on:click={() => setPreviewedMetrics()}
-          >
+          <TabItem title="Advanced Search">
             <!-- Search -->
             <section id="query-section" style={divStyle}>
-              <Search bind:searchTerm on:input={debouncedHandleInput} />
+              <Label class="space-y-2">
+                Search term
+                <Search bind:searchTerm on:input={debouncedHandleInput} />
+              </Label>
+
+              <Label class="space-y-2">
+                Page
+                <NumberInput
+                  bind:value={$page}
+                  on:input={debouncedHandleInput}
+                />
+              </Label>
             </section>
 
             <!-- TODO: convert table for search results into component -->
