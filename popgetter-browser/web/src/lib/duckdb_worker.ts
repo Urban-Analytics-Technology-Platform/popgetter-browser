@@ -39,10 +39,14 @@ export class DuckDBBackend {
     return this.inner != null;
   }
 
-  async getMetrics(sqlString: string): Promise<Array<any>> {
-    if (!this.inner) {
+  isLoadedWithThrow() {
+    if (!this.isLoaded()) {
       throw new Error("DuckDBBackend not initialised");
     }
+  }
+
+  async getMetrics(sqlString: string): Promise<Array<any>> {
+    this.isLoadedWithThrow();
     // Create a new connection
     const conn = await this.inner!.connect();
     // Query (including manually loading httpfs)
