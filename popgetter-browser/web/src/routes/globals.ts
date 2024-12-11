@@ -36,4 +36,4 @@ export const previewedMetricsList: Writable<Array<{}>> = writable(
 export const previewMetricMap: Writable<{}> = writable({});
 // Colours for previewMetricMap
 export const previewMetricMapColors: Writable<Array<{}>> = writable([]);
-export const tileUrl = writable("pmtiles://https://popgetter.blob.core.windows.net/dev/v0.2/usa/geometries/tract_2019.pmtiles");
+export const tileUrl = writable(null);
