@@ -5,6 +5,7 @@
     previewMetricMapColors,
     previewedMetricsList,
     selectedMetricsList,
+    tileUrl,
   } from "./globals";
   import { mode, selectedCountry, selectedLevel } from "./globals";
   import { Button, Dropdown, DropdownItem } from "flowbite-svelte";
@@ -26,6 +27,7 @@
     $previewMetricMapColors = [];
     $selectedMetricsList = [];
     $previewedMetricsList = [];
+    $tileUrl = null;
   });
 </script>
 
