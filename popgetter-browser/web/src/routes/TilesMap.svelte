@@ -33,19 +33,20 @@
     zoom={2}
     bind:bounds
   >
-    <VectorTileSource url={currentUrl} promoteId={"GEO_ID"}>
-      <FillLayer
-        paint={{
-          "fill-color": ["coalesce", ["feature-state", "color"], "#102020"],
-          "fill-opacity": hoverStateFilter(0.7, 1.0),
-        }}
-        sourceLayer={"geoms"}
-        manageHoverState
-        eventsIfTopMost
-        hoverCursor="pointer"
-      >
-        <!-- TODO: WIP add hover   -->
-        <!-- <FillLayer
+    {#if $tileUrl !== null}
+      <VectorTileSource url={currentUrl} promoteId={"GEO_ID"}>
+        <FillLayer
+          paint={{
+            "fill-color": ["coalesce", ["feature-state", "color"], "#102020"],
+            "fill-opacity": hoverStateFilter(0.7, 1.0),
+          }}
+          sourceLayer={"geoms"}
+          manageHoverState
+          eventsIfTopMost
+          hoverCursor="pointer"
+        >
+          <!-- TODO: WIP add hover   -->
+          <!-- <FillLayer
         paint={{
           "fill-color": ["coalesce", ["feature-state", "color"], "#102020"],
           "fill-opacity": 0.7,
@@ -61,12 +62,13 @@
             </p>
           </div>
         </Popup> -->
-      </FillLayer>
-      <JoinedData
-        data={$previewMetricMapColors}
-        idCol="GEO_ID"
-        sourceLayer="geoms"
-      />
-    </VectorTileSource>
+        </FillLayer>
+        <JoinedData
+          data={$previewMetricMapColors}
+          idCol="GEO_ID"
+          sourceLayer="geoms"
+        />
+      </VectorTileSource>
+    {/if}
   </MapLibre>
 {/if}
