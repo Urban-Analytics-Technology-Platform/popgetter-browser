@@ -17,11 +17,26 @@ log = "0.4.20"
 serde = "1.0.188"
 serde_json = "1.0.105"
 serde-wasm-bindgen = "0.6.0"
-wasm-bindgen = "0.2.87"
+wasm-bindgen = { version = "0.2.92", features = ["strict-macro"] }
 web-sys = { version = "0.3.64", features = ["console"] }
 web-time = "1.1.0"
 rand = "0.8.5"
+flatgeobuf = ">=4.2.1,<4.4"
 getrandom = { version = "0.2.15", features = ["js"] }
+polars = { git = "https://github.com/Urban-Analytics-Technology-Platform/polars.git", branch = "rs-0.42.0-parquet-wasm", default-features = false, features = [
+    "polars-io",
+    "fmt_no_tty",
+    "json",
+] }
+popgetter = { git = "https://github.com/Urban-Analytics-Technology-Platform/popgetter-cli.git", rev = "91ce59540e59a1799b1807b2dd72a08c630879f3", default-features = false, features = [
+    "wasm",
+    "formatters",
+] }
+
+wasm-bindgen-futures = "0.4.42"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.42"
 
 # For local development, build dependencies in release mode once, but otherwise
 # use dev profile and avoid wasm-opt.

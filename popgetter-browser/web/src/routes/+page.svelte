@@ -4,24 +4,23 @@
     mapContents,
     sidebarContents,
   } from "@uatp/components/two_column_layout";
-  import { MapLibre } from "svelte-maplibre";
   import TitleMode from "./TitleMode.svelte";
-  import ColourMode from "./ColourMode.svelte";
-  import BubbleChart from "$lib/charts/BubbleChart.svelte";
-  import BarChart from "$lib/charts/BarChart.svelte";
-  import ApiBarChart from "$lib/charts/ApiBarChart.svelte";
 
   import { onMount } from "svelte";
   import type { Map } from "maplibre-gl";
   import * as Comlink from "comlink";
 
-  import { map as mapStore, rustBackend, mode } from "./globals";
+  import { rustBackend, mode, countries, duckdbBackend } from "./globals";
   import rustWorkerWrapper from "$lib/rust_worker?worker";
   import { type RustBackend } from "$lib/rust_worker";
+  import { type DuckDBBackend } from "$lib/duckdb_worker";
+  import duckdbWorkerWrapper from "$lib/duckdb_worker?worker";
+  import DownloadMode from "./DownloadMode.svelte";
+  import LevelsMode from "./LevelsMode.svelte";
+  import { Spinner } from "flowbite-svelte";
 
-  // Everything in this script section is boilerplate; you can ignore it
+  let completedOnMount = false;
 
-  // TODO Refactor this part if possible
   onMount(async () => {
     // If you get "import declarations may only appear at top level of a
     // module", then you need a newer browser.
@@ -39,12 +38,34 @@
     );
     let rustBackendWorker = await new MyRustWorker();
     rustBackend.set(rustBackendWorker);
+
+    // DuckDB
+    interface DuckDBWorkerConstructor {
+      new (): DuckDBBackend;
+    }
+    const MyDuckDBWorker: Comlink.Remote<DuckDBWorkerConstructor> =
+      Comlink.wrap(new duckdbWorkerWrapper());
+    let duckdbBackendWorker = await new MyDuckDBWorker();
+    duckdbBackend.set(duckdbBackendWorker);
+
+    // Init countries
+    const loaded = await $rustBackend!.isLoaded();
+    if (!loaded) {
+      await $rustBackend!.initialise();
+    }
+    $countries = await $rustBackend!.getCountries();
+    console.log($countries);
+    completedOnMount = true;
   });
 
-  let map: Map | undefined = undefined;
-  $: if (map) {
-    mapStore.set(map);
-  }
+  // For debugging
+  // selectedCountry.set("United States");
+  // selectedLevel.set("tract");
+
+  // let map: Map | undefined = undefined;
+  // $: if (map) {
+  //   mapStore.set(map);
+  // }
 
   let sidebarDiv: HTMLDivElement;
   let mapDiv: HTMLDivElement;
@@ -52,35 +73,42 @@
     sidebarDiv.innerHTML = "";
     sidebarDiv.appendChild($sidebarContents);
   }
-  $: if (mapDiv && $mapContents) {
-    mapDiv.innerHTML = "";
-    mapDiv.appendChild($mapContents);
-  }
+  // $: if (mapDiv && $mapContents) {
+  //   mapDiv.innerHTML = "";
+  //   mapDiv.appendChild($mapContents);
+  // }
 </script>
 
 <Layout>
   <div slot="left">
-    <h1>A new title!</h1>
+    <h1
+      class="lg:text-6s md:text-5s mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 dark:text-gray-900"
+    >
+      Popgetter browser
+    </h1>
     <div bind:this={sidebarDiv}></div>
-    <div><BarChart title="A bar chart" /></div>
-    <div><ApiBarChart title="A bar chart with data from an API" /></div>
-    <div><BubbleChart title="A bubble chart with zoom" /></div>
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
-    <MapLibre
+    <!-- <MapLibre
       style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
       standardControls
       hash
       bind:map
-    >
-      <div bind:this={mapDiv}></div>
+    > -->
+    <!-- <div bind:this={mapDiv}></div> -->
 
-      <!-- When you define new modes, you have to wire them up here -->
+    <!-- When you define new modes, you have to wire them up here -->
+    {#if completedOnMount}
       {#if $mode.kind == "title"}
         <TitleMode />
-      {:else if $mode.kind == "colour"}
-        <ColourMode />
+      {:else if $mode.kind == "level"}
+        <LevelsMode />
+      {:else if $mode.kind == "download"}
+        <DownloadMode />
       {/if}
-    </MapLibre>
+    {:else}
+      <Spinner></Spinner>
+    {/if}
+    <!-- </MapLibre> -->
   </div>
 </Layout>
