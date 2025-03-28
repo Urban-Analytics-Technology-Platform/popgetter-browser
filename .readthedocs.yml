@@ -6,9 +6,10 @@ build:
     python: "3.12"
     rust: "1.82"
     nodejs: "18"
-  # jobs:
-  #   pre_build:
-  #     - pydoc-markdown --build --site-dir "$READTHEDOCS_OUTPUT/html"
+  jobs:
+    pre_build:
+      # Copy the README.md file of each package into the docs directory
+      - cp ./README.md docs/index.md
 
     # Potentially, this might be needed if there is content that will be
     # created from the pnpm package.
