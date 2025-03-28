@@ -8,3 +8,5 @@ build:
 
 mkdocs:
   configuration: mkdocs.yml
+
+# Bump this file to trigger a new build
